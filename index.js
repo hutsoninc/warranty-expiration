@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
-const mongoose = require('mongoose');
 const csv = require('csvtojson');
+const mongoose = require('mongoose');
 const helper = require('./api/helper.js');
 const scraper = require('./api/scraper.js');
 
@@ -14,30 +14,103 @@ db = mongoose.connection;
 // Bind connection to error event
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+var Equipment = require('./models/equipment.js');
+
 scraper.scrape().then((result) => {
 
 	var systemResult = [];
-
-	fs.writeFile('./data/data.json', JSON.stringify(result), (err) => {
-		if (err) throw err;
-		console.log('Warranty Expiration data saved');
-	});
-
+	
 	csv({
 		noheader: false,
 		headers: ['PIN', 'Account', 'Dealer', 'Customer Name', 'Phone', 'Street 1', 'Street 2', 'Postal Code', 'City', 'Region', 'Country', 'Expires', 'Warranty Type']
 	})
 	.fromFile(process.env.DOWNLOADS_PATH + 'warranty-expiration-' + helper.getDateString({delimiter: '.', format: 'dd:mm:yyyy'}) + '.csv')
 	.on('json', (jsonObj) => {
+
+		// Formatting
+		jsonObj.Account = jsonObj.Account.match(/\d/g).join(''); // Remove escape characters from Account Number
+		if(jsonObj['Postal Code'].length > 5){ // If 9-digit postal code, add a hyphen
+			jsonObj['Postal Code'] = jsonObj['Postal Code'].substr(0,5) + '-' + jsonObj['Postal Code'].substr(5);
+		}
+
+		// MongoDB
+		Equipment.findById(jsonObj.PIN, function(err, result){
+
+			if(err) return console.error(err);
+
+			var dateArr = jsonObj.Expires.split('.');
+			var dateFormatted = dateArr[1] + "/" + dateArr[0] + "/" +  dateArr[2];
+
+			if(!result){
+
+				var entry = new Equipment({
+					_id: jsonObj.PIN,
+					account: jsonObj.Account,
+					street1: jsonObj['Street 1'],
+					street2: jsonObj['Street 2'],
+					postalCode: jsonObj['Postal Code'],
+					city: jsonObj.City,
+					region: jsonObj.Region,
+					country: jsonObj.Country,
+					warrantyType: jsonObj['Warranty Type'],
+					expirationDate: dateFormatted
+				});
+		
+				entry.save(function (err){
+					if(err) return console.error(err);
+				});
+
+			}else {
+				
+				result.account = jsonObj.Account;
+				result.street1 = jsonObj['Street 1'];
+				result.street2 = jsonObj['Street 2'];
+				result.postalCode = jsonObj['Postal Code'];
+				result.city = jsonObj.City;
+				result.region = jsonObj.Region;
+				result.country = jsonObj.Country;
+				result.warrantyType = jsonObj['Warranty Type'];
+				result.expirationDate = dateFormatted;
+		
+				result.save(function (err){
+					if(err) return console.error(err);
+				});
+
+			}
+
+		});
+		
 		systemResult.push(jsonObj);
+
 	})
 	.on('done', (error) => {
-		console.log('csv converted');
+
+		console.log('Warranty System data saved to database');
+
 		fs.writeFile('./data/systemData.json', JSON.stringify(systemResult), (err) => {
 			if (err) throw err;
-			console.log('Warranty System data saved');
-			process.exit();
+			console.log('Warranty System data saved to local file');
 		});
+
+	});
+
+	result.forEach(function(elem, index){
+
+		var daysLeft = Number(elem.expDaysLeft) + 1;
+
+		Equipment.update(
+			{_id: elem.pin}, 
+			{model: elem.model, expirationDate: helper.getDateString({distance: daysLeft})}, 
+			function(err){
+				if(err) return console.error(err);
+			}
+		);
+
+	});
+
+	fs.writeFile('./data/data.json', JSON.stringify(result), (err) => {
+		if (err) throw err;
+		console.log('Warranty Expiration data saved');
 	});
 
 });
