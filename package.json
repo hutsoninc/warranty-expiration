@@ -15,6 +15,7 @@
   "dependencies": {
     "csvtojson": "^1.1.9",
     "dotenv": "^5.0.0",
+    "lob": "^5.0.0",
     "mongoose": "^5.0.6",
     "puppeteer": "^1.0.0"
   }
