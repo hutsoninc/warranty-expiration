@@ -18,5 +18,8 @@
     "lob": "^5.0.0",
     "mongoose": "^5.0.6",
     "puppeteer": "^1.0.0"
+  },
+  "devDependencies": {
+    "html-minifier": "^3.5.9"
   }
 }
