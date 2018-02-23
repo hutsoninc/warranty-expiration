@@ -3,7 +3,7 @@ var fs = require('fs');
 var Lob = require('lob')(process.env.LOB_KEY);
 var Equipment = require('./../models/equipment.js');
 
-// Source depends on where the send function is ran
+// Source depends on where the send function is called
 var templateFrontSrc = './app/templates/dist/warranty4x6Front.min.html';
 var templateBackSrc = './app/templates/dist/warranty4x6Back.min.html';
 var templateFront, templateBack;
