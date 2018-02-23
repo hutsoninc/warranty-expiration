@@ -16,9 +16,9 @@ exports.getDateString = function(config){
     }
 
 	var d = new Date(Date.now() + distanceTimestamp);
-	var dM = d.getMonth() + 1; // starts at 0
-	var dD = d.getDate();
-    var dY = d.getFullYear();
+	var dM = config.month || d.getMonth() + 1; // use this month if none is provided
+	var dD = config.day || d.getDate(); // use today if day is not provided
+    var dY = config.year || d.getFullYear(); // use this year if none is provided
 
     if(dM < 10){
         dM = '0' + dM;
@@ -33,5 +33,16 @@ exports.getDateString = function(config){
     }else if(format.toLowerCase() == 'dd:mm:yyyy'){
         return dD + delimiter + dM + delimiter + dY;
     }
+
+}
+
+exports.daysInMonth = function(month, year){
+
+    if(year == undefined){
+        year = new Date().getFullYear();
+    }
+
+    // Month is 1-indexed (January is 1, February is 2, etc).
+    return new Date(year, month, 0).getDate();
 
 }

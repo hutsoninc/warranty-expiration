@@ -11,11 +11,12 @@ const DOWNLOADS_PATH = '../../Downloads/';
 
 // Models
 var Equipment = require('./app/models/equipment.js');
+var Report = require('./app/models/report.js');
 
 app.load().then(() => {
-    /*
+    
     scraper.scrape().then(() => {
-    */
+    
         var dashboardReport = {
             timestamp: new Date(),
             equipmentAdded: 0,
@@ -113,13 +114,28 @@ app.load().then(() => {
             // need to improve how this is done...
             setTimeout(function(){
                 console.log(dashboardReport);
-                process.exit(0);
+
+                var report = new Report({
+                    timestamp: dashboardReport.timestamp,
+                    equipmentAdded: dashboardReport.equipmentAdded,
+                    equipmentDiscarded: dashboardReport.equipmentDiscarded,
+                    equipmentMissing: dashboardReport.equipmentMissing,
+                    equipmentTotal: dashboardReport.equipmentTotal,
+                    missingEquipment: dashboardReport.missingEquipment
+                });
+        
+                report.save(function (err){
+                    if(err) return console.error(err);
+
+                    process.exit(0);
+                });
+                
             }, 10000);
     
         });
-    /*
+    
     });
-*/
+
 }, (err) => {
 
     console.log(err);

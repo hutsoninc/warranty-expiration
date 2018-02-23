@@ -47,8 +47,6 @@ exports.run = function(scrapedData){
                 }
     
             }else{
-
-                console.log(scrapedData);
     
                 // if not in equipmentData
                 resolve({

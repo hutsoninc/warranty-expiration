@@ -3,13 +3,24 @@ const puppeteer = require('puppeteer');
 const helper = require('./helper.js');
 
 exports.scrape = async function(){
-	
-	var startDistance = 60;
-	var endDistance = 90;
+
+	var config = {
+		endDay: helper.daysInMonth(4, 2018),
+		month: 4, // 1-12
+		year: 2018
+	}
   
 	const browser = await puppeteer.launch({headless: false});
 	var page = await browser.newPage();
 
+	await page.goto('https://dealerpath.deere.com/');
+
+	await page.waitForSelector('#username');
+	await page.type('#username', process.env.DEERE_USER);
+	await page.type('[type="password"]', process.env.DEERE_PWD);
+	await page.click('[name="login"]');
+	
+	/*
 	// Scrape Warranty Reports Data
 	await page.goto('https://warrantyreports.deere.com/reports/WarrantyReports.do');
 	await page.type('#username', process.env.DEERE_USER);
@@ -26,8 +37,10 @@ exports.scrape = async function(){
 	await page.keyboard.up('Shift');
 	
 	await page.waitForSelector('#dateStart');
-	await page.addScriptTag({content: "document.querySelector('#dateStart').setAttribute('value', '" + helper.getDateString({distance: startDistance}) + "');"});
-	await page.addScriptTag({content: "document.querySelector('#dateEnd').setAttribute('value', '" + helper.getDateString({distance: endDistance}) + "');"});
+	await page.addScriptTag({content: "document.querySelector('#dateStart').setAttribute('value', '" + helper.getDateString({day: 1, month: config.month, year: config.year}) + "');"});
+	await page.addScriptTag({content: "document.querySelector('#dateEnd').setAttribute('value', '" + helper.getDateString({day: config.endDay, month: config.month, year: config.year}) + "');"});
+
+	await helper.delay(7500);
 	
 	page.on('dialog', async dialog => {
 		await dialog.accept();
@@ -57,6 +70,7 @@ exports.scrape = async function(){
 
 		return data;
 	});
+	*/
 
 	// Download Warranty System Data
 	await page.goto('https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration?_k=jyedxr');
@@ -64,9 +78,10 @@ exports.scrape = async function(){
 	await page.waitForSelector('[title="Basic Warranty"');
 	await page.click('[title="Basic Warranty"]');
 
-	await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > input', helper.getDateString({distance: startDistance, delimiter: '.', format: 'dd:mm:yyyy'}));
+	await page.waitForSelector('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > input');
+	await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > input', helper.getDateString({day: 1, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 	await page.keyboard.press('Tab');
-	await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(3) > div > input', helper.getDateString({distance: endDistance, delimiter: '.', format: 'dd:mm:yyyy'}));
+	await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(3) > div > input', helper.getDateString({day: config.endDay, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 	await page.keyboard.press('Tab');
 	
 	await page.click('div.warranty-expiration-report-criteria.report-criteria > section > div.button-group > button.primary-button');
@@ -80,6 +95,6 @@ exports.scrape = async function(){
 	await helper.delay(10000);
 
 	browser.close();
-	return result;
+	//return result;
 
 };
