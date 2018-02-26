@@ -10,12 +10,18 @@ const app = require('./app.js');
 const DOWNLOADS_PATH = '../../Downloads/';
 
 // Models
-var Equipment = require('./app/models/equipment.js');
-var Report = require('./app/models/report.js');
+var Equipment = require('./app/models/Equipment.js');
+var Report = require('./app/models/Report.js');
 
 app.load().then(() => {
     
-    scraper.scrape().then(() => {
+    console.log('Starting scrape...');
+    scraper.scrape().then((returnError) => {
+
+        if(returnError){
+            console.log('Error occured. Exiting...');
+            process.exit(0);
+        }
     
         var dashboardReport = {
             timestamp: new Date(),
@@ -109,10 +115,9 @@ app.load().then(() => {
         })
         .on('done', (error) => {
     
-            console.log('Warranty System data saved to database');
-
             // need to improve how this is done...
             setTimeout(function(){
+                console.log('Warranty System data saved to database');
                 console.log(dashboardReport);
 
                 var report = new Report({
@@ -130,7 +135,7 @@ app.load().then(() => {
                     process.exit(0);
                 });
                 
-            }, 10000);
+            }, 15000);
     
         });
     

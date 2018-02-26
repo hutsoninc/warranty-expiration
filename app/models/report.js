@@ -11,4 +11,4 @@ var reportSchema = new Schema({
     missingEquipment: Array
 });
 
-module.exports = mongoose.model('report', reportSchema);
+module.exports = mongoose.model('Report', reportSchema);

@@ -1,7 +1,7 @@
 require('dotenv').config();
 var fs = require('fs');
 var Lob = require('lob')(process.env.LOB_KEY);
-var Equipment = require('./../models/equipment.js');
+var Equipment = require('./../models/Equipment.js');
 
 // Source depends on where the send function is called
 var templateFrontSrc = './app/templates/dist/warranty4x6Front.min.html';
@@ -24,8 +24,6 @@ exports.send = function(){
 
         result.forEach(function(e, i){
 
-            var model = e.model || 'equipment';
-
             // Send postcard
             Lob.postcards.create({
                 description: 'Warranty Postcard Serial #: ' + e._id,
@@ -40,8 +38,9 @@ exports.send = function(){
                 front: templateFront,
                 back: templateBack,
                 merge_variables: {
-                    serial: e._id,
-                    model: model
+                    expDate: e.expirationDate,
+                    model: e.model,
+                    serial: e._id
                 }
             }, function (err, res){
                 console.log(res);
