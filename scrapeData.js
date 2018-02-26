@@ -1,6 +1,4 @@
 require('dotenv').config();
-var _ = require('lodash/core');
-const fs = require('fs');
 const csv = require('csvtojson');
 const helper = require('./app/api/helper.js');
 const scraper = require('./app/api/scraper.js');
