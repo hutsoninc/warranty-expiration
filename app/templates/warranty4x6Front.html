@@ -1,49 +1,39 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
-<title>Lob.com Sample 4x6 Postcard Front</title>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+<title>Hutson, Inc. Warranty Expiration 4x6 Postcard Back</title>
 <style>
-  *, *:before, *:after {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
   body {
     width: 6.25in;
     height: 4.25in;
     margin: 0;
     padding: 0;
     /* If using an image, the background image should have dimensions of 1875x1275 pixels. */
-    /* background-image: url(https://s3-us-west-2.amazonaws.com/lob-assets/beach.jpg); */
+    background-image: url('https://s3.us-east-2.amazonaws.com/hutsoninc.lob-assets/images/warranty-postcard-front.jpg');
     background-size: 6.25in 4.25in;
     background-repeat: no-repeat;
   }
-  #safe-area {
-    position: absolute;
-    width: 5.875in;
-    height: 3.875in;
-    left: 0.1875in;
-    top: 0.1875in;
-    background-color: rgba(255,255,255,0.5);
-  }
   .text {
-    margin: 10px;
+    color: #000000;
     font-family: 'Open Sans';
+    font-size: 10pt;
     font-weight: 400;
-    font-size: 40px;
-    color: white;
-    text-shadow: 2px 2px black;
+    hyphens: none;
+    left: 3.25in;
+    position: absolute;
+    top: 1.46in;
+    width: 2.75in;
   }
 </style>
 </head>
 
 <body>
-  <div id="safe-area">
-    <!-- All text should appear within the safe area. -->
-    <div class="text">
-      {{model}}
-    </div>
+  <div class="text">
+    The warranty on your <span style="font-weight: 600">{{model}}</span> is expiring soon:<br><br>
+    <span style="font-weight: 600">Serial #{{serial}}</span><br>
+    <span style="font-weight: 600">Expires {{expDate}}</span><br><br>
+    See back side for locations and contact information.
   </div>
 </body>
 

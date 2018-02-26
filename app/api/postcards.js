@@ -1,6 +1,6 @@
 require('dotenv').config();
 var fs = require('fs');
-var Lob = require('lob')(process.env.LOB_KEY);
+var Lob = require('lob')(process.env.TEST_LOB_KEY);
 var Equipment = require('./../models/Equipment.js');
 
 // Source depends on where the send function is called
@@ -24,9 +24,24 @@ exports.send = function(){
 
         result.forEach(function(e, i){
 
+        // var e = {
+        //     _id: '1M0X300CAEM284382',
+        //     model: '1025R',
+        //     name: 'AUSTIN GORDON',
+        //     street1: '306 ANDRUS DRIVE',
+        //     street2: '',
+        //     postalCode: '42071',
+        //     city: 'MURRAY',
+        //     region: 'KY',
+        //     country: 'US',
+        //     warrantyType: 'B-Basic Warranty',
+        //     expirationDate: '04/21/2018',
+        //     postcardSent: false
+        // }
+
             // Send postcard
             Lob.postcards.create({
-                description: 'Warranty Postcard Serial #: ' + e._id,
+                description: 'Warranty Postcard Serial #' + e._id,
                 to: {
                     name: e.name,
                     address_line1: e.street1,
