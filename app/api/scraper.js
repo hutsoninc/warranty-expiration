@@ -17,6 +17,10 @@ exports.scrape = async function(){
 
 	try{
 
+		if(process.env.NODE_ENV == "production"){
+			await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './downloads'});		
+		}
+
 		await page.goto('https://dealerpath.deere.com/');
 
 		await page.waitForSelector('#username');

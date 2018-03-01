@@ -6,7 +6,7 @@ exports.load = function(){
 	return new Promise(function(resolve, reject){
 			
 		// Set up default mongoose connection
-		var mongoDB = 'mongodb://' + process.env.DB_LOCATION;
+		var mongoDB = process.env.DB_LOCATION;
 
 		mongoose.connect(mongoDB, function(err) {
 

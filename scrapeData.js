@@ -5,7 +5,13 @@ const scraper = require('./app/api/scraper.js');
 const filter = require('./app/api/filter.js');
 const app = require('./app.js');
 
-const DOWNLOADS_PATH = '../../Downloads/';
+var DOWNLOADS_PATH;
+
+if(process.env.NODE_ENV == 'production'){
+    DOWNLOADS_PATH = './downloads/';
+}else {
+    DOWNLOADS_PATH = '../../Downloads/';
+}
 
 // Models
 var Equipment = require('./app/models/Equipment.js');
