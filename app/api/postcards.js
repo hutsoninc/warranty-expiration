@@ -96,24 +96,22 @@ exports.send = function(){
     
         })();
         
-    }).then(() => {
-     
-        //setTimeout(function(){
-
-            var sendReport = new SendReport({
-                timestamp: dashboardSendReport.timestamp,
-                postcardsSent: dashboardSendReport.postcardsSent,
-                sendErrors: dashboardSendReport.sendErrors,
-                totalEvaluated: dashboardSendReport.totalEvaluated
-            });
-    
-            sendReport.save(function (err){
-                if(err) return console.error(err);
-                console.log('Report saved.')
-            });
-    
-        //}, 30000);
-
     });
+     
+    setTimeout(function(){
+
+        var sendReport = new SendReport({
+            timestamp: dashboardSendReport.timestamp,
+            postcardsSent: dashboardSendReport.postcardsSent,
+            sendErrors: dashboardSendReport.sendErrors,
+            totalEvaluated: dashboardSendReport.totalEvaluated
+        });
+
+        sendReport.save(function (err){
+            if(err) return console.error(err);
+            console.log('Report saved.')
+        });
+
+    }, 60000);
 
 }
