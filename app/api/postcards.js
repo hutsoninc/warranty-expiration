@@ -20,6 +20,9 @@ exports.send = function(){
         totalEvaluated: 0
     };
 
+    var currentResult;
+    var i = 0;
+
     fs.readFile(templateFrontSrc, 'utf8', (err, data) => {
         templateFront = data;
     });
@@ -27,84 +30,75 @@ exports.send = function(){
     fs.readFile(templateBackSrc, 'utf8', (err, data) => {
         templateBack = data;
     });
-
-    setTimeout(function(){
         
-        Equipment.find({postcardSent: false}).exec(function(err, result){
-            
-            if(err) return console.error(err);
+    Equipment.find({postcardSent: false}).exec(function(err, result){
+        
+        if(err) return console.error(err);
 
-            result.forEach(function(e, i){
+        (function sendPostcard(){
 
-                // var e = {
-                //     _id: '1M0X300CAEM284382',
-                //     model: '1025R',
-                //     name: 'AUSTIN GORDON',
-                //     street1: '306 ANDRUS DRIVE',
-                //     street2: '',
-                //     postalCode: '42071',
-                //     city: 'MURRAY',
-                //     region: 'KY',
-                //     country: 'US',
-                //     warrantyType: 'B-Basic Warranty',
-                //     expirationDate: '04/21/2018',
-                //     postcardSent: false
-                // }
+            currentResult = result[i];
 
-                setTimeout(function(){             
+            setTimeout(function(){
+    
+                dashboardSendReport.totalEvaluated++;
 
-                    dashboardSendReport.totalEvaluated++;
+                // Send postcard
+                Lob.postcards.create({
+                    description: 'Warranty Postcard Serial #' + currentResult._id,
+                    to: {
+                        name: currentResult.name,
+                        address_line1: currentResult.street1,
+                        address_line2: currentResult.street2,
+                        address_city: currentResult.city,
+                        address_state: currentResult.region,
+                        address_zip: currentResult.postalCode
+                    },
+                    front: templateFront,
+                    back: templateBack,
+                    merge_variables: {
+                        expDate: currentResult.expirationDate,
+                        model: currentResult.model,
+                        serial: currentResult._id
+                    }
+                }, function (err, res){
 
-                    // Send postcard
-                    Lob.postcards.create({
-                        description: 'Warranty Postcard Serial #' + e._id,
-                        to: {
-                            name: e.name,
-                            address_line1: e.street1,
-                            address_line2: e.street2,
-                            address_city: e.city,
-                            address_state: e.region,
-                            address_zip: e.postalCode
-                        },
-                        front: templateFront,
-                        back: templateBack,
-                        merge_variables: {
-                            expDate: e.expirationDate,
-                            model: e.model,
-                            serial: e._id
-                        }
-                    }, function (err, res){
+                    if(err){
 
-                        if(err){
+                        console.log(err);
 
-                            console.log(err);
+                        dashboardSendReport.sendErrors++;
 
-                            dashboardSendReport.sendErrors++;
+                    }else {
 
-                        }else {
+                        dashboardSendReport.postcardsSent++;
 
-                            dashboardSendReport.postcardsSent++;
+                        // Mark as sent
+                        Equipment.update(
+                            {_id: currentResult._id}, 
+                            {postcardSent: true}, 
+                            function(err){
+                                if(err) return console.error(err);
+                            }
+                        );
 
-                            // Mark as sent
-                            Equipment.update(
-                                {_id: e._id}, 
-                                {postcardSent: true}, 
-                                function(err){
-                                    if(err) return console.error(err);
-                                }
-                            );
+                    }
 
-                        }
-
-                    });
-
-                }, 50);
-            
-            });
-            
-        });
-
-        setTimeout(function(){
+                });
+    
+                i++;
+                
+                if(i < result.length){
+                    sendPostcard();
+                }
+    
+            }, 30)
+    
+        })();
+        
+    }).then(() => {
+     
+        //setTimeout(function(){
 
             var sendReport = new SendReport({
                 timestamp: dashboardSendReport.timestamp,
@@ -117,9 +111,9 @@ exports.send = function(){
                 if(err) return console.error(err);
                 console.log('Report saved.')
             });
+    
+        //}, 30000);
 
-        }, 30000);
-
-    }, 3000);
+    });
 
 }
