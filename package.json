@@ -16,7 +16,6 @@
     "csvtojson": "^1.1.9",
     "dotenv": "^5.0.0",
     "lob": "^5.0.0",
-    "lodash": "^4.17.5",
     "mongoose": "^5.0.6",
     "puppeteer": "^1.0.0"
   },
