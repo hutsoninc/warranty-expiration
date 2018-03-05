@@ -105,7 +105,7 @@ exports.send = function(){
         var sendReport = new SendReport({
             timestamp: dashboardSendReport.timestamp,
             postcardsSent: dashboardSendReport.postcardsSent,
-            errors: dashboardSendReport.sendErrors,
+            sendErrors: dashboardSendReport.sendErrors,
             totalEvaluated: dashboardSendReport.totalEvaluated
         });
 
