@@ -51,52 +51,54 @@ exports.send = function(){
                 //     postcardSent: false
                 // }
 
-                dashboardSendReport.totalEvaluated++;
+                setTimeout(function(){             
 
-                // Send postcard
-                Lob.postcards.create({
-                    description: 'Warranty Postcard Serial #' + e._id,
-                    to: {
-                        name: e.name,
-                        address_line1: e.street1,
-                        address_line2: e.street2,
-                        address_city: e.city,
-                        address_state: e.region,
-                        address_zip: e.postalCode
-                    },
-                    front: templateFront,
-                    back: templateBack,
-                    merge_variables: {
-                        expDate: e.expirationDate,
-                        model: e.model,
-                        serial: e._id
-                    }
-                }, function (err, res){
+                    dashboardSendReport.totalEvaluated++;
 
-                    if(err){
+                    // Send postcard
+                    Lob.postcards.create({
+                        description: 'Warranty Postcard Serial #' + e._id,
+                        to: {
+                            name: e.name,
+                            address_line1: e.street1,
+                            address_line2: e.street2,
+                            address_city: e.city,
+                            address_state: e.region,
+                            address_zip: e.postalCode
+                        },
+                        front: templateFront,
+                        back: templateBack,
+                        merge_variables: {
+                            expDate: e.expirationDate,
+                            model: e.model,
+                            serial: e._id
+                        }
+                    }, function (err, res){
 
-                        console.log(err);
+                        if(err){
 
-                        dashboardSendReport.sendErrors++;
+                            console.log(err);
 
-                    }else {
+                            dashboardSendReport.sendErrors++;
 
-                        dashboardSendReport.postcardsSent++;
+                        }else {
 
-                        // Mark as sent
-                        Equipment.update(
-                            {_id: e._id}, 
-                            {postcardSent: true}, 
-                            function(err){
-                                if(err) return console.error(err);
-                            }
-                        );
+                            dashboardSendReport.postcardsSent++;
 
-                    }
+                            // Mark as sent
+                            Equipment.update(
+                                {_id: e._id}, 
+                                {postcardSent: true}, 
+                                function(err){
+                                    if(err) return console.error(err);
+                                }
+                            );
 
-                });
+                        }
 
-                
+                    });
+
+                }, 50);
             
             });
             
@@ -116,7 +118,7 @@ exports.send = function(){
                 console.log('Report saved.')
             });
 
-        }, 5000);
+        }, 30000);
 
     }, 3000);
 
