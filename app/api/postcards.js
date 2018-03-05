@@ -9,7 +9,7 @@ var SendReport = require('../models/SendReport.js');
 var dashboardSendReport = {
     timestamp: new Date(),
     postcardsSent: 0,
-    errors: 0,
+    sendErrors: 0,
     totalEvaluated: 0
 };
 
@@ -77,7 +77,7 @@ exports.send = function(){
 
                         console.log(err);
 
-                        dashboardSendReport.errors++;
+                        dashboardSendReport.sendErrors++;
 
                     }else {
 
@@ -105,7 +105,7 @@ exports.send = function(){
         var sendReport = new SendReport({
             timestamp: dashboardSendReport.timestamp,
             postcardsSent: dashboardSendReport.postcardsSent,
-            errors: dashboardSendReport.errors,
+            errors: dashboardSendReport.sendErrors,
             totalEvaluated: dashboardSendReport.totalEvaluated
         });
 

@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 var sendReportSchema = new Schema({
     timestamp: Date,
     postcardsSent: Number,
-    errors: Number,
+    sendErrors: Number,
     totalEvaluated: Number
 });
 
