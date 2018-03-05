@@ -77,7 +77,7 @@ app.load().then(() => {
                                 region: jsonObj.Region,
                                 country: jsonObj.Country,
                                 warrantyType: jsonObj['Warranty Type'],
-                                expirationDate: dateFormatted,
+                                expirationDate: new Date(dateFormatted),
                                 postcardSent: false
                             });
                     

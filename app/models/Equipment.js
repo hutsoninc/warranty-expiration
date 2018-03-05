@@ -14,8 +14,9 @@ var equipmentSchema = new Schema({
 	region: String,
 	country: String,
 	warrantyType: String,
-	expirationDate: String,
-	postcardSent: Boolean
+	expirationDate: Date,
+	postcardSent: Boolean,
+	errorSending: Boolean
 });
 
 module.exports = mongoose.model('Equipment', equipmentSchema);

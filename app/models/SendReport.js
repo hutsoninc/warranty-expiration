@@ -6,6 +6,7 @@ var sendReportSchema = new Schema({
     timestamp: Date,
     postcardsSent: Number,
     sendErrors: Number,
+    unsent: Array,
     totalEvaluated: Number
 });
 

@@ -17,11 +17,13 @@ exports.send = function(){
         timestamp: new Date(),
         postcardsSent: 0,
         sendErrors: 0,
+        unsent: [],
         totalEvaluated: 0
     };
 
     var currentResult;
-    var i = 0;
+    var sentIds = [];
+    var i = 0, j = 0;
 
     fs.readFile(templateFrontSrc, 'utf8', (err, data) => {
         templateFront = data;
@@ -31,9 +33,9 @@ exports.send = function(){
         templateBack = data;
     });
         
-    Equipment.find({postcardSent: false}).exec(function(err, result){
+    Equipment.find({postcardSent: false, errorSending: {$exists: false}}).exec(function(err, result){
         
-        if(err) return console.error(err);
+        if(err) console.log(err);
 
         (function sendPostcard(){
 
@@ -43,11 +45,17 @@ exports.send = function(){
     
                 dashboardSendReport.totalEvaluated++;
 
+                var expDateFormatted = currentResult.expirationDate.getMonth() + 1 + "/" + currentResult.expirationDate.getDate() + "/" + currentResult.expirationDate.getFullYear();
+
+                if(currentResult.name.length > 40){
+                    
+                }
+
                 // Send postcard
                 Lob.postcards.create({
                     description: 'Warranty Postcard Serial #' + currentResult._id,
                     to: {
-                        name: currentResult.name,
+                        name: (currentResult.name.length > 40 ? 'Current Resident' : currentResult.name),
                         address_line1: currentResult.street1,
                         address_line2: currentResult.street2,
                         address_city: currentResult.city,
@@ -57,7 +65,7 @@ exports.send = function(){
                     front: templateFront,
                     back: templateBack,
                     merge_variables: {
-                        expDate: currentResult.expirationDate,
+                        expDate: expDateFormatted,
                         model: currentResult.model,
                         serial: currentResult._id
                     }
@@ -65,53 +73,86 @@ exports.send = function(){
 
                     if(err){
 
-                        console.log(err);
+                        fs.appendFile('./logs/sendErrors.log', (new Date().toLocaleString() + " | (" + currentResult._id + ") " + err + '\n'), err => {
+                            if(err) console.log(err);
+                        });
 
+                        Equipment.findById(currentResult._id, function(err, equipment){
+
+                            if(err) console.log(err);
+                          
+                            equipment.set({errorSending: true});
+
+                            equipment.save(function(err){
+
+                                if(err) console.log(err);
+                                increment();
+
+                            });
+
+                        });
+                        
+                        dashboardSendReport.unsent.push(currentResult._id);
                         dashboardSendReport.sendErrors++;
+
+                        console.log('Saved error log: ' + dashboardSendReport.sendErrors + " - " + currentResult._id);
 
                     }else {
 
                         dashboardSendReport.postcardsSent++;
 
-                        // Mark as sent
-                        Equipment.update(
-                            {_id: currentResult._id}, 
-                            {postcardSent: true}, 
-                            function(err){
-                                if(err) return console.error(err);
-                            }
-                        );
+                        Equipment.findById(currentResult._id, function(err, equipment){
+
+                            if(err) console.log(err);
+                          
+                            equipment.set({postcardSent: true});
+
+                            equipment.save(function(err){
+
+                                if(err) console.log(err);
+                                increment();
+
+                            });
+
+                        });
 
                     }
 
                 });
-    
-                i++;
+
+                function increment(){
+
+                    i++;
+                    
+                    if(i < result.length){
+
+                        sendPostcard();
+
+                    }else {
+
+                        // Create a report
+                        var sendReport = new SendReport({
+                            timestamp: dashboardSendReport.timestamp,
+                            postcardsSent: dashboardSendReport.postcardsSent,
+                            sendErrors: dashboardSendReport.sendErrors,
+                            unsent: dashboardSendReport.unsent,
+                            totalEvaluated: dashboardSendReport.totalEvaluated
+                        });
                 
-                if(i < result.length){
-                    sendPostcard();
+                        sendReport.save(function (err){
+                            if(err) return console.error(err);
+                            console.log('Report saved.');
+                            process.exit();
+                        });
+
+                    }
+
                 }
     
-            }, 30)
+            }, 50)
     
         })();
         
-    });
-     
-    setTimeout(function(){
-
-        var sendReport = new SendReport({
-            timestamp: dashboardSendReport.timestamp,
-            postcardsSent: dashboardSendReport.postcardsSent,
-            sendErrors: dashboardSendReport.sendErrors,
-            totalEvaluated: dashboardSendReport.totalEvaluated
-        });
-
-        sendReport.save(function (err){
-            if(err) return console.error(err);
-            console.log('Report saved.')
-        });
-
-    }, 60000);
+    }); 
 
 }
