@@ -1,17 +1,10 @@
 require('dotenv').config();
 var fs = require('fs');
 var Lob = require('lob')(process.env.TEST_LOB_KEY);
-var Equipment = require('./../models/Equipment.js');
 
 // Models
-var SendReport = require('../models/SendReport.js');
-
-var dashboardSendReport = {
-    timestamp: new Date(),
-    postcardsSent: 0,
-    sendErrors: 0,
-    totalEvaluated: 0
-};
+var Equipment = require('./../models/Equipment.js');
+var SendReport = require('./../models/SendReport.js');
 
 // Source depends on where the send function is called
 var templateFrontSrc = './app/templates/dist/warranty4x6Front.min.html';
@@ -19,6 +12,13 @@ var templateBackSrc = './app/templates/dist/warranty4x6Back.min.html';
 var templateFront, templateBack;
 
 exports.send = function(){
+
+    var dashboardSendReport = {
+        timestamp: new Date(),
+        postcardsSent: 0,
+        sendErrors: 0,
+        totalEvaluated: 0
+    };
 
     fs.readFile(templateFrontSrc, 'utf8', (err, data) => {
         templateFront = data;
@@ -102,17 +102,21 @@ exports.send = function(){
             
         });
 
-        var sendReport = new SendReport({
-            timestamp: dashboardSendReport.timestamp,
-            postcardsSent: dashboardSendReport.postcardsSent,
-            sendErrors: dashboardSendReport.sendErrors,
-            totalEvaluated: dashboardSendReport.totalEvaluated
-        });
+        setTimeout(function(){
 
-        sendReport.save(function (err){
-            if(err) return console.error(err);
-            console.log('Report saved.')
-        });
+            var sendReport = new SendReport({
+                timestamp: dashboardSendReport.timestamp,
+                postcardsSent: dashboardSendReport.postcardsSent,
+                sendErrors: dashboardSendReport.sendErrors,
+                totalEvaluated: dashboardSendReport.totalEvaluated
+            });
+    
+            sendReport.save(function (err){
+                if(err) return console.error(err);
+                console.log('Report saved.')
+            });
+
+        }, 5000);
 
     }, 3000);
 
