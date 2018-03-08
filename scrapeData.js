@@ -5,6 +5,10 @@ const scraper = require('./app/api/scraper.js');
 const filter = require('./app/api/filter.js');
 const app = require('./app.js');
 
+// Models
+var Equipment = require('./app/models/Equipment.js');
+var Report = require('./app/models/Report.js');
+
 var DOWNLOADS_PATH;
 
 if(process.env.NODE_ENV == 'production'){
@@ -13,140 +17,140 @@ if(process.env.NODE_ENV == 'production'){
     DOWNLOADS_PATH = '../../Downloads/';
 }
 
-// Models
-var Equipment = require('./app/models/Equipment.js');
-var Report = require('./app/models/Report.js');
-
-app.load().then(() => {
+exports.run = function(){
     
-    console.log('Starting scrape...');
-    scraper.scrape().then((returnError) => {
-
-        if(returnError){
-            console.log('Error occured. Exiting...');
-            process.exit(0);
-        }
-    
-        var dashboardReport = {
-            timestamp: new Date(),
-            equipmentAdded: 0,
-            equipmentDiscarded: 0,
-            equipmentMissing: 0,
-            equipmentTotal: 0,
-            missingEquipment: []
-        };
+    app.load().then(() => {
         
-        csv({
-            noheader: false,
-            headers: ['PIN', 'Account', 'Dealer', 'Customer Name', 'Phone', 'Street 1', 'Street 2', 'Postal Code', 'City', 'Region', 'Country', 'Expires', 'Warranty Type']
-        })
-        .fromFile(DOWNLOADS_PATH + 'warranty-expiration-' + helper.getDateString({delimiter: '.', format: 'dd:mm:yyyy'}) + '.csv')
-        .on('json', (jsonObj) => {
+        console.log('Starting scrape...');
+        scraper.scrape().then((returnError) => {
 
-            var equipmentReport = filter.run(jsonObj).then((equipmentReport) => {
-
-                dashboardReport.equipmentTotal++;
-
-                if(equipmentReport.model){
-
-                    // found, add to database
-                    Equipment.findById(jsonObj.PIN, function(err, result){
+            if(returnError){
+                console.log('Error occured. Exiting...');
+                process.exit(0);
+            }
         
-                        if(err) return console.error(err);
+            var dashboardReport = {
+                timestamp: new Date(),
+                equipmentAdded: 0,
+                equipmentDiscarded: 0,
+                equipmentMissing: 0,
+                equipmentTotal: 0,
+                missingEquipment: []
+            };
             
-                        // Format Data
-                        jsonObj.Account = jsonObj.Account.match(/\d/g).join(''); // Remove escape characters from Account Number
-                        if(jsonObj['Postal Code'].length > 5){ // If 9-digit postal code, add a hyphen
-                            jsonObj['Postal Code'] = jsonObj['Postal Code'].substr(0, 5) + '-' + jsonObj['Postal Code'].substr(5);
-                        }
+            csv({
+                noheader: false,
+                headers: ['PIN', 'Account', 'Dealer', 'Customer Name', 'Phone', 'Street 1', 'Street 2', 'Postal Code', 'City', 'Region', 'Country', 'Expires', 'Warranty Type']
+            })
+            .fromFile(DOWNLOADS_PATH + 'warranty-expiration-' + helper.getDateString({delimiter: '.', format: 'dd:mm:yyyy'}) + '.csv')
+            .on('json', (jsonObj) => {
+
+                var equipmentReport = filter.run(jsonObj).then((equipmentReport) => {
+
+                    dashboardReport.equipmentTotal++;
+
+                    if(equipmentReport.model){
+
+                        // found, add to database
+                        Equipment.findById(jsonObj.PIN, function(err, result){
             
-                        var dateArr = jsonObj.Expires.split('.');
-                        var dateFormatted = dateArr[1] + "/" + dateArr[0] + "/" +  dateArr[2];
-            
-                        if(!result){
-            
-                            var entry = new Equipment({
-                                _id: jsonObj.PIN,
-                                model: equipmentReport.model,
-                                account: jsonObj.Account,
-                                name: jsonObj['Customer Name'],
-                                street1: jsonObj['Street 1'],
-                                street2: jsonObj['Street 2'],
-                                postalCode: jsonObj['Postal Code'],
-                                city: jsonObj.City,
-                                region: jsonObj.Region,
-                                country: jsonObj.Country,
-                                warrantyType: jsonObj['Warranty Type'],
-                                expirationDate: new Date(dateFormatted),
-                                postcardSent: false
-                            });
-                    
-                            entry.save(function (err){
-                                if(err) return console.error(err);
+                            if(err) return console.error(err);
+                
+                            // Format Data
+                            jsonObj.Account = jsonObj.Account.match(/\d/g).join(''); // Remove escape characters from Account Number
+                            if(jsonObj['Postal Code'].length > 5){ // If 9-digit postal code, add a hyphen
+                                jsonObj['Postal Code'] = jsonObj['Postal Code'].substr(0, 5) + '-' + jsonObj['Postal Code'].substr(5);
+                            }
+                
+                            var dateArr = jsonObj.Expires.split('.');
+                            var dateFormatted = dateArr[1] + "/" + dateArr[0] + "/" +  dateArr[2];
+                
+                            if(!result){
+                
+                                var entry = new Equipment({
+                                    _id: jsonObj.PIN,
+                                    model: equipmentReport.model,
+                                    account: jsonObj.Account,
+                                    name: jsonObj['Customer Name'],
+                                    street1: jsonObj['Street 1'],
+                                    street2: jsonObj['Street 2'],
+                                    postalCode: jsonObj['Postal Code'],
+                                    city: jsonObj.City,
+                                    region: jsonObj.Region,
+                                    country: jsonObj.Country,
+                                    warrantyType: jsonObj['Warranty Type'],
+                                    expirationDate: new Date(dateFormatted),
+                                    postcardSent: false
+                                });
+                        
+                                entry.save(function (err){
+                                    if(err) return console.error(err);
 
-                                // track number added
-                                dashboardReport.equipmentAdded++;
-                            });
-            
-                        }else {
+                                    // track number added
+                                    dashboardReport.equipmentAdded++;
+                                });
+                
+                            }else {
 
-                            // this shouldn't happen unless report is ran for same month twice
-                            //console.log('Equipment already in database: ' + jsonObj.PIN);
-            
-                        }
-            
-                    });
-                    
-                }else if(equipmentReport.found && !equipmentReport.kept){
+                                // this shouldn't happen unless report is ran for same month twice
+                                //console.log('Equipment already in database: ' + jsonObj.PIN);
+                
+                            }
+                
+                        });
+                        
+                    }else if(equipmentReport.found && !equipmentReport.kept){
 
-                    // track number discarded
-                    dashboardReport.equipmentDiscarded++;
+                        // track number discarded
+                        dashboardReport.equipmentDiscarded++;
 
-                }else {
+                    }else {
 
-                    // track number missing and flag equipment serial number to be added to equipmentData
-                    dashboardReport.equipmentMissing++;
-                    dashboardReport.missingEquipment.push(jsonObj.PIN);
+                        // track number missing and flag equipment serial number to be added to equipmentData
+                        dashboardReport.equipmentMissing++;
+                        dashboardReport.missingEquipment.push(jsonObj.PIN);
 
-                }
-            
-            }, (err) => {
+                    }
+                
+                }, (err) => {
 
-                if(err) return console.error(err);
-
-            });
-    
-        })
-        .on('done', (error) => {
-    
-            // need to improve how this is done...
-            setTimeout(function(){
-                console.log('Warranty System data saved to database');
-                console.log(dashboardReport);
-
-                var report = new Report({
-                    timestamp: dashboardReport.timestamp,
-                    equipmentAdded: dashboardReport.equipmentAdded,
-                    equipmentDiscarded: dashboardReport.equipmentDiscarded,
-                    equipmentMissing: dashboardReport.equipmentMissing,
-                    equipmentTotal: dashboardReport.equipmentTotal,
-                    missingEquipment: dashboardReport.missingEquipment
-                });
-        
-                report.save(function (err){
                     if(err) return console.error(err);
 
-                    process.exit(0);
                 });
-                
-            }, 15000);
-    
+        
+            })
+            .on('done', (error) => {
+        
+                // need to improve how this is done...
+                setTimeout(function(){
+                    console.log('Warranty System data saved to database');
+                    console.log(dashboardReport);
+
+                    var report = new Report({
+                        timestamp: dashboardReport.timestamp,
+                        equipmentAdded: dashboardReport.equipmentAdded,
+                        equipmentDiscarded: dashboardReport.equipmentDiscarded,
+                        equipmentMissing: dashboardReport.equipmentMissing,
+                        equipmentTotal: dashboardReport.equipmentTotal,
+                        missingEquipment: dashboardReport.missingEquipment
+                    });
+            
+                    report.save(function (err){
+                        if(err) return console.error(err);
+
+                        process.exit(0);
+                    });
+                    
+                }, 15000);
+        
+            });
+        
         });
-    
+
+    }, (err) => {
+
+        console.log(err);
+
     });
 
-}, (err) => {
-
-    console.log(err);
-
-});
+}
