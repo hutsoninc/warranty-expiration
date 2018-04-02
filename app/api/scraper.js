@@ -12,8 +12,13 @@ exports.scrape = async function(){
 	config.endDay = helper.daysInMonth(config.month, 2018);
 
 	var returnError;
+
+	const options = {
+        headless: true,
+        ignoreHTTPSErrors: true,
+    };
 	
-	const browser = await puppeteer.launch({headless: false});
+	const browser = await puppeteer.launch(options);
 	var page = await browser.newPage();
 
 	try{
@@ -49,62 +54,10 @@ exports.scrape = async function(){
 			return;
 
 		});
-	
-		/*
-		// Scrape Warranty Reports Data
-		await page.goto('https://warrantyreports.deere.com/reports/WarrantyReports.do');
-		await page.type('#username', process.env.DEERE_USER);
-		await page.type('[type="password"]', process.env.DEERE_PWD);
-		await page.click('[name="login"]');
-
-		await page.waitForSelector('.ent_leftnavmainlink');
-		await page.addScriptTag({content: "leftNavSubmit('ExpiryReportPage');"});
-			
-		await page.waitForSelector('#dealerPerson');
-		await page.click('#dealerPerson option:nth-of-type(2)');
-		await page.keyboard.down('Shift');
-		await page.click('#dealerPerson option:last-of-type');
-		await page.keyboard.up('Shift');
 		
-		await page.waitForSelector('#dateStart');
-		await page.addScriptTag({content: "document.querySelector('#dateStart').setAttribute('value', '" + helper.getDateString({day: 1, month: config.month, year: config.year}) + "');"});
-		await page.addScriptTag({content: "document.querySelector('#dateEnd').setAttribute('value', '" + helper.getDateString({day: config.endDay, month: config.month, year: config.year}) + "');"});
-
-		await helper.delay(7500);
-		
-		page.on('dialog', async dialog => {
-			await dialog.accept();
-		});
-		
-		await page.waitForSelector('#go');
-		await page.click('#go');
-		
-		await page.waitForSelector('[name="searchLimit"]');
-		await page.addScriptTag({content: "document.querySelector('select[name=\"searchLimit\"] > option[value=\"2000\"]').setAttribute(\"selected\",\"selected\")"});
-
-		await page.click('input[value="Search"]');
-
-		await helper.delay(15000);
-
-		const result = await page.evaluate(() => {
-			let data = [];
-			let elements = document.querySelectorAll('#sortIt > tr');
-			
-			elements.forEach(function(element, index){
-				let pin = element.childNodes[3].childNodes[0].innerText;
-				let model = element.childNodes[5].innerText;
-				let expDaysLeft = element.querySelector('td:last-of-type').innerText;
-
-				data.push({pin, model, expDaysLeft});
-			});
-
-			return data;
-		});
-		*/
-
 		// Download Warranty System Data
-		await page.goto('https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration?_k=jyedxr');
-
+		await page.goto('https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration');
+		
 		await page.waitForSelector('[title="Basic Warranty"');
 		await page.waitForSelector('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > div.react-datepicker-wrapper > div > input');
 		
@@ -123,7 +76,13 @@ exports.scrape = async function(){
 		await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > div.react-datepicker-wrapper > div > input', helper.getDateString({day: 1, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 		await page.keyboard.press('Tab');
 							
-		await page.keyboard.press('Backspace');
+		for(i = 0; i < 10; i++){
+			
+			await page.keyboard.press('Backspace');
+			await page.keyboard.press('Delete');
+			await helper.delay(100);
+
+		}
 
 		await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(3) > div > div.react-datepicker-wrapper > div > input', helper.getDateString({day: config.endDay, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 		await page.keyboard.press('Tab');
