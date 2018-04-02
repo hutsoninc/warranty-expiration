@@ -13,7 +13,7 @@ exports.scrape = async function(){
 
 	var returnError;
 	
-	const browser = await puppeteer.launch({headless: true});
+	const browser = await puppeteer.launch({headless: false});
 	var page = await browser.newPage();
 
 	try{
@@ -135,4 +135,4 @@ exports.scrape = async function(){
 
 	await browser.close();
 	return returnError;
-};
+}
