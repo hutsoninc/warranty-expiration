@@ -110,8 +110,21 @@ exports.scrape = async function(){
 		
 		await page.click('[title="Basic Warranty"]');
 
+		await page.click('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > div.react-datepicker-wrapper > div > input');
+		
+		for(i = 0; i < 10; i++){
+			
+			await page.keyboard.press('Backspace');
+			await page.keyboard.press('Delete');
+			await helper.delay(100);
+
+		}
+
 		await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(1) > div > div.react-datepicker-wrapper > div > input', helper.getDateString({day: 1, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 		await page.keyboard.press('Tab');
+							
+		await page.keyboard.press('Backspace');
+
 		await page.type('div.warranty-expiration-date-range-criteria > section > ul > li:nth-child(3) > div > div.react-datepicker-wrapper > div > input', helper.getDateString({day: config.endDay, month: config.month, year: config.year, delimiter: '.', format: 'dd:mm:yyyy'}));
 		await page.keyboard.press('Tab');
 		
