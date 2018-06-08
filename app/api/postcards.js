@@ -1,6 +1,6 @@
 require('dotenv').config();
 var fs = require('fs');
-var Lob = require('lob')(process.env.TEST_LOB_KEY);
+var Lob = require('lob')(process.env.LIVE_LOB_KEY);
 
 // Models
 var Equipment = require('./../models/Equipment.js');
