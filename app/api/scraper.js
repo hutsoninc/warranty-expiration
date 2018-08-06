@@ -5,7 +5,7 @@ const helper = require('./helper.js');
 exports.scrape = async function(){
 
 	var config = {
-		month: 9, // 1-12
+		month: 10, // 1-12
 		year: 2018
 	}
 
@@ -14,7 +14,7 @@ exports.scrape = async function(){
 	var returnError;
 
 	const options = {
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
     };
 	
