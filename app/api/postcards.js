@@ -22,8 +22,7 @@ exports.send = function(){
     };
 
     var currentResult;
-    var sentIds = [];
-    var i = 0, j = 0;
+    var i = 0;
 
     fs.readFile(templateFrontSrc, 'utf8', (err, data) => {
         templateFront = data;
@@ -46,10 +45,6 @@ exports.send = function(){
                 dashboardSendReport.totalEvaluated++;
 
                 var expDateFormatted = currentResult.expirationDate.getMonth() + 1 + "/" + currentResult.expirationDate.getDate() + "/" + currentResult.expirationDate.getFullYear();
-
-                if(currentResult.name.length > 40){
-                    
-                }
 
                 // Send postcard
                 Lob.postcards.create({

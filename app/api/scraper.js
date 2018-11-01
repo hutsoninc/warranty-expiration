@@ -5,11 +5,11 @@ const helper = require('./helper.js');
 exports.scrape = async function(){
 
 	var config = {
-		month: 11, // 1-12
-		year: 2018
+		month: 1, // 1-12
+		year: 2019
 	}
 
-	config.endDay = helper.daysInMonth(config.month, 2018);
+	config.endDay = helper.daysInMonth(config.month, config.year);
 
 	var returnError;
 
