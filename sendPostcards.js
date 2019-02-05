@@ -1,10 +1,10 @@
 require('dotenv').config();
-const postcards = require('./app/api/postcards.js')
-const app = require('./app.js');
+const sendPostcards = require('./src/send-postcards.js')
+const db = require('./src/db.js');
 
-app.load().then(() => {
+db.load().then(() => {
 
-    postcards.send();
+    sendPostcards();
 
 }, (err) => {
 

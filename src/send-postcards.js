@@ -31,7 +31,7 @@ module.exports = function(options) {
             setTimeout(function() {
                 dashboardSendReport.totalEvaluated++;
 
-                var expDateFormatted =
+                let expDateFormatted =
                     currentResult.expirationDate.getMonth() +
                     1 +
                     '/' +

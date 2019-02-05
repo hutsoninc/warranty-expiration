@@ -7,8 +7,9 @@ module.exports = async function(options) {
     options = Object.assign({}, options);
 
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
+        args: ['--start-fullscreen']
     });
     let page = await browser.newPage();
 

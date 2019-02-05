@@ -9,8 +9,10 @@ const scrape = require('./scrape.js');
 const filter = require('./filter.js');
 const db = require('./db.js');
 
-module.exports = async function(options) {
-    options = Object.assign({}, config, options);
+module.exports = async function (options) {
+    options = Object.assign({
+        scrape: true
+    }, config, options);
 
     let { Equipment, Report } = options.models;
 
@@ -138,7 +140,7 @@ module.exports = async function(options) {
 };
 
 function findEquipment(id, Equipment) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         Equipment.findById(id, (err, result) => {
             if (err) reject(err);
             resolve(result);
@@ -147,7 +149,7 @@ function findEquipment(id, Equipment) {
 }
 
 function saveDocument(doc) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         doc.save((err, result) => {
             if (err) reject(err);
             resolve(result);
