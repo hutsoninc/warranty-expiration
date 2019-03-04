@@ -2,6 +2,10 @@
 
 Scrapes warranty report and sends a postcard to customers to inform them of an upcoming warranty expiration.
 
+## Usage
+
+1. 
+
 ## Built With
 
 * [Puppeteer](https://github.com/GoogleChrome/puppeteer) - Headless Chrome Node API
