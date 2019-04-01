@@ -4,7 +4,7 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
 
 ## Usage
 
-1. 
+1. Run `npm run scrape` to scrape data
 
 ## Built With
 

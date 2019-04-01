@@ -11,7 +11,7 @@ const db = require('./db.js');
 
 module.exports = async function (options) {
     options = Object.assign({
-        scrape: true
+        scrape: false
     }, config, options);
 
     let { Equipment, Report } = options.models;
