@@ -22,7 +22,7 @@
         "bluebird": "^3.5.5",
         "dotenv": "^6.1.0",
         "lob": "^6.0.2",
-        "mongoose": "^5.3.14",
+        "mongoose": "^5.5.11",
         "puppeteer": "^1.11.0"
     },
     "devDependencies": {
