@@ -19,7 +19,7 @@
     "license": "MIT",
     "dependencies": {
         "@hutsoninc/utils": "^1.0.4",
-        "bluebird": "^3.5.3",
+        "bluebird": "^3.5.5",
         "dotenv": "^6.1.0",
         "lob": "^6.0.2",
         "mongoose": "^5.3.14",
@@ -27,6 +27,6 @@
     },
     "devDependencies": {
         "html-minifier": "^3.5.21",
-        "opn-cli": "^4.0.0"
+        "opn-cli": "^5.0.0"
     }
 }
