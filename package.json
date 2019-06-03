@@ -4,10 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "jdws": "opn https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
+        "jdws": "open https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
         "scrape": "npm run start",
         "send": "node sendPostcards",
-        "sheets": "opn https://docs.google.com/spreadsheets/d/1h9SKD77FtaTFvaNJ_-xXnGuJ4MOfPaSTldY81Fs0bxM",
+        "sheets": "open https://docs.google.com/spreadsheets/d/1h9SKD77FtaTFvaNJ_-xXnGuJ4MOfPaSTldY81Fs0bxM",
         "start": "node index",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -20,13 +20,13 @@
     "dependencies": {
         "@hutsoninc/utils": "^1.0.4",
         "bluebird": "^3.5.5",
-        "dotenv": "^6.1.0",
-        "lob": "^6.0.2",
+        "dotenv": "^8.0.0",
+        "lob": "^6.0.5",
         "mongoose": "^5.3.14",
-        "puppeteer": "^1.11.0"
+        "puppeteer": "^1.17.0"
     },
     "devDependencies": {
         "html-minifier": "^3.5.21",
-        "opn-cli": "^5.0.0"
+        "open-cli": "^5.0.0"
     }
 }
