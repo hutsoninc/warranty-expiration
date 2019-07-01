@@ -13,7 +13,7 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
 7. Run `npm run start`
 8. Add any missing equipment to the equipment
     - Run `npm run sheets` to open the sheet
-    - Add the missing equipment and sort id descending
+    - Add the missing equipment and sort id
     - Export to JSON by clicking the 'Custom' tab, then 'Export Data'
     - Copy the JSON and paste to the `equipment.json` file under `src/data`
 9. Run `npm run start` again to update the database
