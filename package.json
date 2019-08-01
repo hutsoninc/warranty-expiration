@@ -4,10 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "jdws": "open https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
+        "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
         "scrape": "npm run start",
         "send": "node sendPostcards",
-        "sheets": "open https://docs.google.com/spreadsheets/d/1h9SKD77FtaTFvaNJ_-xXnGuJ4MOfPaSTldY81Fs0bxM",
+        "sheets": "open-cli https://docs.google.com/spreadsheets/d/1h9SKD77FtaTFvaNJ_-xXnGuJ4MOfPaSTldY81Fs0bxM",
         "start": "node index",
         "test": "echo \"Error: no test specified\" && exit 1"
     },

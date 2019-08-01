@@ -8,7 +8,7 @@ module.exports = async function(options) {
 
     const browser = await puppeteer.launch({
         headless: false,
-        ignoreHTTPSErrors: true
+        ignoreHTTPSErrors: true,
     });
     let page = await browser.newPage();
 
