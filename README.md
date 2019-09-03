@@ -12,10 +12,12 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
 6. Update the month number in `src/config.js` to the month used in step 4
 7. Run `npm run start`
 8. Add any missing equipment to the equipment
-    - Run `npm run sheets` to open the sheet
-    - Add the missing equipment and sort id
-    - Export to JSON by clicking the 'Custom' tab, then 'Export Data'
-    - Copy the JSON and paste to the `equipment.json` file under `src/data`
+    1. Run `npm run sheets` to open the sheet
+    2. Navigate to the Pin Cross Reference section in JD Warranty System (https://jdwarrantysystem.deere.com/portal/#/products/pin-cross-reference)
+    3. Search for the missing pin numbers to find the model name
+    4. Add the missing equipment model names to the sheet and sort by id
+    5. Export to JSON by clicking the 'Custom' tab, then 'Export Data'
+    6. Copy the JSON and paste to the `equipment.json` file under `src/data`
 9. Run `npm run start` again to update the database
 10. Run `npm run send` to send postcards
 
