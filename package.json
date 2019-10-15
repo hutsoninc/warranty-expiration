@@ -19,7 +19,7 @@
     "license": "MIT",
     "dependencies": {
         "@hutsoninc/utils": "^1.0.4",
-        "bluebird": "^3.5.5",
+        "bluebird": "^3.7.1",
         "dotenv": "^8.0.0",
         "lob": "^6.0.5",
         "mongoose": "^5.3.14",
