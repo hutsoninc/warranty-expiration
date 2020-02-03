@@ -123,10 +123,14 @@ module.exports = async function(options) {
                 postcardSent: false,
             });
 
-            return saveDocument(entry).then(() => {
-                // track number added
-                dashboardReport.equipmentAdded++;
-            });
+            return saveDocument(entry)
+                .then(() => {
+                    // track number added
+                    dashboardReport.equipmentAdded++;
+                })
+                .catch(err => {
+                    console.error(err);
+                });
         });
     });
 
