@@ -27,6 +27,6 @@
     },
     "devDependencies": {
         "html-minifier": "^3.5.21",
-        "open-cli": "^5.0.0"
+        "open-cli": "^6.0.1"
     }
 }
