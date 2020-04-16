@@ -21,7 +21,7 @@
         "@hutsoninc/utils": "^1.0.4",
         "bluebird": "^3.5.5",
         "dotenv": "^8.0.0",
-        "lob": "^6.0.5",
+        "lob": "^6.1.0",
         "mongoose": "^5.3.14",
         "puppeteer": "^1.17.0"
     },
