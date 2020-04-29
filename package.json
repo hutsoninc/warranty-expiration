@@ -23,7 +23,7 @@
         "dotenv": "^8.0.0",
         "lob": "^6.0.5",
         "mongoose": "^5.3.14",
-        "puppeteer": "^1.17.0"
+        "puppeteer": "^3.0.2"
     },
     "devDependencies": {
         "html-minifier": "^3.5.21",
