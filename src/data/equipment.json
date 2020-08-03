@@ -259,6 +259,7 @@
         { "id": "1T0318G", "model": "318G", "keep": true },
         { "id": "1T0319E", "model": "319E", "keep": true },
         { "id": "1T0320E", "model": "320E", "keep": true },
+        { "id": "1T0320G", "model": "320G", "keep": true },
         { "id": "1T0323E", "model": "323E", "keep": true },
         { "id": "1T0324E", "model": "324E", "keep": true },
         { "id": "1T0324G", "model": "324G", "keep": true },
