@@ -18,7 +18,7 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
     4. Add the missing equipment model names to the sheet and sort by id
     5. Export to JSON by clicking the 'Custom' tab, then 'Export Data'
     6. Copy the JSON and paste to the `equipment.json` file under `src/data`
-9. Run `npm run start` again to update the database
+    7. Run `npm run start` again to update the database
 10. Run `npm run send` to send postcards
 
 ## Built With
