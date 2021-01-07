@@ -9,7 +9,7 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
 3. Navigate to https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration
 4. Make sure all locations and 'Basic Warranty' are checked and set the date range (2 months from run date)
 5. Run report and download Excel sheet
-6. Update the month number in `src/config.js` to the month used in step 4
+6. Update the month/year in `src/config.js` to the date used in step 4
 7. Run `npm run start`
 8. Add any missing equipment to the equipment
     1. Run `npm run sheets` to open the sheet

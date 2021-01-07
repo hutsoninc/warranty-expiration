@@ -3,8 +3,8 @@ const fs = require('fs');
 const { daysInMonth } = require('./helpers');
 
 let config = {
-    month: 11, // 1-12
-    year: 2020,
+    month: 3, // 1-12
+    year: 2021,
 };
 
 config.endDay = daysInMonth(config.month, config.year);
