@@ -1020,6 +1020,10 @@
             "keep": false
         },
         {
+            "id": "1P0300E",
+            "keep": false
+        },
+        {
             "id": "1P0300R",
             "keep": false
         },
@@ -1519,6 +1523,11 @@
         {
             "id": "1TCW32AG",
             "model": "WG32A",
+            "keep": true
+        },
+        {
+            "id": "1TCW36HL",
+            "model": "WHP36A",
             "keep": true
         },
         {
