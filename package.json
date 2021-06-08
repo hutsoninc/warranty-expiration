@@ -1,7 +1,7 @@
 {
     "name": "warranty-expiration",
     "version": "1.0.0",
-    "description": "",
+    "description": "Tool for sending warranty expiration notifications.",
     "main": "index.js",
     "scripts": {
         "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",

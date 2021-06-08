@@ -1,6 +1,6 @@
 # Warranty Expiration App
 
-Scrapes warranty report and sends a postcard to customers to inform them of an upcoming warranty expiration.
+Tool for sending warranty expiration notifications. Takes in warranty expiration and extended warranty eligibility lists from John Deere, merges data, sends postcards and letters via [Lob](https://www.lob.com), and creates emails lists to upload to HubSpot.
 
 ## Usage
 
@@ -22,12 +22,6 @@ TODO: Add update the month/year in `src/config.js` to the date used in step 3
 3. Search for the missing pin numbers to find model names
 4. Add the missing equipment model names to the sheet and sort adcending by id
 5. Save the file
-
-## Built With
-
-* [Puppeteer](https://github.com/GoogleChrome/puppeteer) - Headless Chrome Node API
-* [Lob Node](https://github.com/lob/lob-node) - Postcard automation API
-
 ## License
 
 MIT © [Hutson Inc](https://www.hutsoninc.com)
