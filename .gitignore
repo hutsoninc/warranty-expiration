@@ -1,6 +1,10 @@
 node_modules/
-downloads/
 .env
-test.js
-logs
-*.log
+
+exports/*
+src/templates/dist/*
+!src/templates/*/
+uploads/*
+!uploads/*/
+
+!**/.gitkeep

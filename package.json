@@ -5,25 +5,23 @@
     "main": "index.js",
     "scripts": {
         "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
-        "scrape": "npm run start",
-        "send": "node sendPostcards",
-        "sheets": "open-cli https://docs.google.com/spreadsheets/d/1h9SKD77FtaTFvaNJ_-xXnGuJ4MOfPaSTldY81Fs0bxM",
-        "start": "node index",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node .",
+        "prestart": "node scripts/minify-templates.js"
     },
     "author": {
         "name": "Austin Gordon",
-        "email": "gordon.austin2@gmail.com",
-        "url": "https://www.austinleegordon.com"
+        "email": "gordon.austin2@gmail.com"
     },
     "license": "MIT",
     "dependencies": {
-        "@hutsoninc/utils": "^1.0.4",
-        "bluebird": "^3.5.5",
+        "@hutsoninc/data-scrubber": "^2.0.0",
+        "@hutsoninc/utils": "^1.0.6",
+        "@sanity/client": "^2.10.5",
+        "bottleneck": "^2.19.5",
         "dotenv": "^8.0.0",
+        "fs-extra": "^10.0.0",
         "lob": "^6.0.5",
-        "mongoose": "^5.3.14",
-        "puppeteer": "^1.17.0"
+        "xlsx": "^0.17.0"
     },
     "devDependencies": {
         "html-minifier": "^3.5.21",

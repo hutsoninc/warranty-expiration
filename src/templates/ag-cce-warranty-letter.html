@@ -1,0 +1,150 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Hutson, Inc. Ag/CCE Warranty Expiration Letter</title>
+        <style>
+            *,
+            *:before,
+            *:after {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: #ffffff;
+                color: #000000;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 12pt;
+                font-weight: 400;
+                height: 11in;
+                hyphens: none;
+                line-height: 1.5;
+                margin: 0;
+                width: 8.5in;
+            }
+
+            #page {
+                height: inherit;
+                padding: 0.75in 1in 1in;
+                page-break-after: always;
+                position: relative;
+                width: inherit;
+            }
+
+            #page-content {
+                height: 9.25in;
+                left: 1in;
+                position: absolute;
+                top: 0.75in;
+                width: 6.5in;
+            }
+
+            #header {
+                color: #808080;
+                margin-bottom: 0.5in;
+                width: 100%;
+            }
+
+            #logo {
+                width: 2.5in;
+            }
+
+            #main {
+                width: 100%;
+            }
+
+            #footer {
+                bottom: -0.5in;
+                color: #808080;
+                position: absolute;
+                width: 100%;
+            }
+
+            .grid {
+                position: relative;
+            }
+
+            .grid:after {
+                clear: both;
+                content: ' ';
+                display: block;
+                font-size: 0;
+                height: 0;
+                visibility: hidden;
+            }
+
+            .column:first-child {
+                float: left;
+                text-align: left;
+            }
+
+            .column:last-child {
+                float: right;
+                text-align: right;
+            }
+
+            .column {
+                width: 50%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="page">
+            <div id="page-content">
+                <div id="header">
+                    <div class="grid">
+                        <div class="column">
+                            <img id="logo" src="./static/hutson-logo.jpg" />
+                        </div>
+                        <div class="column">
+                            <span
+                                >Hutson, Inc.<br />{{hutsonAddressLine1}}<br />
+                                {{hutsonAddressLine2}}</span
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div id="main">
+                    <p>
+                        {{name}}<br />
+                        {{addressLine1}}<br />
+                        {{addressLine2}}
+                    </p>
+
+                    <p>
+                        Our records show that your warranty is about to expire
+                        on the following equipment:
+                    </p>
+
+                    <ul>
+                        {{equipmentList}}
+                    </ul>
+
+                    <p>
+                        We encourage you to schedule an inspection with us
+                        before the warranty expires if you haven’t already! You
+                        may also be able to add an extended warranty for your
+                        equipment. For more information, reach out to your
+                        account manager or call your local Hutson store at
+                        {{hutsonPhoneNumber}}.
+                    </p>
+
+                    <p>Sincerely,</p>
+
+                    <p>
+                        Hutson, Inc.<br />
+                        {{hutsonPhoneNumber}}
+                    </p>
+                </div>
+                <div id="footer">
+                    <div class="grid">
+                        <div class="column">{{date}}</div>
+                        <div class="column">www.Hutsoninc.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

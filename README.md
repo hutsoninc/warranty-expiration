@@ -4,22 +4,24 @@ Scrapes warranty report and sends a postcard to customers to inform them of an u
 
 ## Usage
 
-1. Make sure the Mongo daemon process ([`mongod`](https://docs.mongodb.com/manual/reference/program/mongod/)) is running
-2. Run `npm run jdws` and sign in
-3. Navigate to https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration
-4. Make sure all locations and 'Basic Warranty' are checked and set the date range (2 months from run date)
-5. Run report and download Excel sheet
-6. Update the month/year in `src/config.js` to the date used in step 4
-7. Run `npm run start`
-8. Add any missing equipment to the equipment
-    1. Run `npm run sheets` to open the sheet
-    2. Navigate to the Pin Cross Reference section in JD Warranty System (https://jdwarrantysystem.deere.com/portal/#/products/pin-cross-reference)
-    3. Search for the missing pin numbers to find the model name
-    4. Add the missing equipment model names to the sheet and sort by id
-    5. Export to JSON by clicking the 'Custom' tab, then 'Export Data'
-    6. Copy the JSON and paste to the `equipment.json` file under `src/data`
-    7. Run `npm run start` again to update the database
-10. Run `npm run send` to send postcards
+1. Run `npm run jdws` and sign in
+2. Navigate to https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration
+3. Make sure all locations and 'Basic Warranty' are checked and set the date range (2 months from run date)
+4. Run report and download Excel sheet
+
+TODO: Add download powergard lists
+TODO: Add move files into uploads folder
+TODO: Add update the month/year in `src/config.js` to the date used in step 3
+
+6. Run `npm run start`
+
+### How to add missing equipment
+
+1. Open the sheet found in `src/data/equipment.csv`
+2. Navigate to the Pin Cross Reference section in JD Warranty System (https://jdwarrantysystem.deere.com/portal/#/products/pin-cross-reference)
+3. Search for the missing pin numbers to find model names
+4. Add the missing equipment model names to the sheet and sort adcending by id
+5. Save the file
 
 ## Built With
 
