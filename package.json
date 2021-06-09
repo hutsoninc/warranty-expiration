@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
+        "pg": "open-cli https://ew.deere.com/extwrnty/web#!",
         "start": "node .",
         "prestart": "node scripts/minify-templates.js"
     },
@@ -20,6 +21,7 @@
         "bottleneck": "^2.19.5",
         "dotenv": "^8.0.0",
         "fs-extra": "^10.0.0",
+        "json2csv": "^5.0.6",
         "lob": "^6.0.5",
         "xlsx": "^0.17.0"
     },

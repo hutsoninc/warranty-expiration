@@ -11,6 +11,7 @@ const {
     getMonthName,
     isDefined,
     isEmptyString,
+    jsonToCsv,
     toListString,
     xlsxToJson,
 } = require('./src/utils');
@@ -590,10 +591,19 @@ const main = async () => {
             };
         });
 
-    fs.writeFileSync(
-        path.join(exportsPath, `powergard-email-list-${timestamp}.json`),
-        JSON.stringify(powerGardEmailList, null, 4)
+    const csvHeaders = Object.keys(powerGardEmailList[0]);
+
+    const powerGardEmailListCsv = await jsonToCsv(
+        powerGardEmailList,
+        csvHeaders
     );
+
+    fs.writeFileSync(
+        path.join(exportsPath, `powergard-email-list-${timestamp}.csv`),
+        powerGardEmailListCsv
+    );
+
+    console.log('Moving files to the completed directory...');
 
     await Promise.all(
         spreadsheetFiles.map((fileName) => {
