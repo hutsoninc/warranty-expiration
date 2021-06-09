@@ -16,8 +16,9 @@ const {
     xlsxToJson,
 } = require('./src/utils');
 const fetchHutsonLocations = require('./src/fetch-hutson-locations');
-const Lob = require('lob')(process.env.TEST_LOB_KEY);
+const lob = require('lob');
 const Bottleneck = require('bottleneck');
+const prompt = require('prompt');
 
 const lobLimiter = new Bottleneck({
     maxConcurrent: 25,
@@ -122,9 +123,38 @@ const conditionalCreateList = (data, test) => {
 };
 
 const main = async () => {
+    prompt.start();
+
+    const promptResponses = await new Promise((resolve, reject) => {
+        prompt.get(
+            [
+                {
+                    name: 'dryRun',
+                    description: 'Would you like to do a dry run? (y/n)',
+                    type: 'string',
+                    required: true,
+                    pattern: /^(y|n)$/i,
+                },
+            ],
+            (err, result) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve({
+                    dryRun: /y/i.test(result.dryRun) ? true : false,
+                });
+            }
+        );
+    });
+
     const helpers = {
         lobLimiter,
-        Lob,
+        Lob: lob(
+            process.env[
+                promptResponses.dryRun ? 'TEST_LOB_KEY' : 'LIVE_LOB_KEY'
+            ]
+        ),
+        ...promptResponses,
     };
 
     const dateString = new Date().toLocaleString('en-US', {

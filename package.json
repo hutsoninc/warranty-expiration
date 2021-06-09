@@ -23,6 +23,7 @@
         "fs-extra": "^10.0.0",
         "json2csv": "^5.0.6",
         "lob": "^6.0.5",
+        "prompt": "^1.1.0",
         "xlsx": "^0.17.0"
     },
     "devDependencies": {
