@@ -19,11 +19,12 @@ const Lob = require('lob')(process.env.TEST_LOB_KEY);
 const Bottleneck = require('bottleneck');
 
 const lobLimiter = new Bottleneck({
-    maxConcurrent: 50,
-    minTime: 5000 / 150,
+    maxConcurrent: 25,
+    minTime: 5000 / 125, // Max is 150 per 5 seconds
 });
 
 const uploadsPath = path.join(__dirname, 'uploads');
+const uploadsCompletedPath = path.join(__dirname, 'uploads/completed');
 const exportsPath = path.join(__dirname, 'exports');
 
 const equipmentLookupFileName = 'equipment.csv';
@@ -35,6 +36,26 @@ const equipmentLookupFilePath = path.join(
 const agCceLetterTemplatePath = path.join(
     __dirname,
     'src/templates/dist/ag-cce-warranty-letter.min.html'
+);
+
+const turfPowergardPostcardTemplateFrontPath = path.join(
+    __dirname,
+    'src/templates/dist/turf-powergard-postcard-front.min.html'
+);
+
+const turfPowergardPostcardTemplateBackPath = path.join(
+    __dirname,
+    'src/templates/dist/turf-powergard-postcard-back.min.html'
+);
+
+const turfGenericPostcardTemplateFrontPath = path.join(
+    __dirname,
+    'src/templates/dist/turf-generic-postcard-front.min.html'
+);
+
+const turfGenericPostcardTemplateBackPath = path.join(
+    __dirname,
+    'src/templates/dist/turf-generic-postcard-back.min.html'
 );
 
 const xlsxProperties = ['PIN-17', 'Customer Email Address'];
@@ -70,6 +91,35 @@ const validateProperties = (data, propertiesArr, { fileName }) => {
     });
 };
 
+const conditionalCreateList = (data, test) => {
+    return data.reduce((acc, obj) => {
+        if (test(obj)) {
+            const { category, model, pin, expirationDate, ...rest } = obj;
+            const modelDetails = {
+                category,
+                model,
+                pin,
+                expirationDate,
+            };
+            // Check if customer is already in the list
+            const matchIndex = acc.findIndex(
+                (i) =>
+                    `${i.street1}-${i.postalCode}` ===
+                    `${obj.street1}-${obj.postalCode}`
+            );
+            if (matchIndex === -1) {
+                acc.push({
+                    ...rest,
+                    models: [modelDetails],
+                });
+            } else {
+                acc[matchIndex].models.push(modelDetails);
+            }
+        }
+        return acc;
+    }, []);
+};
+
 const main = async () => {
     const helpers = {
         lobLimiter,
@@ -94,6 +144,26 @@ const main = async () => {
     // Get templates
     const agCceLetterTemplate = fs.readFileSync(
         agCceLetterTemplatePath,
+        'utf-8'
+    );
+
+    const turfPowergardPostcardTemplateFront = fs.readFileSync(
+        turfPowergardPostcardTemplateFrontPath,
+        'utf-8'
+    );
+
+    const turfPowergardPostcardTemplateBack = fs.readFileSync(
+        turfPowergardPostcardTemplateBackPath,
+        'utf-8'
+    );
+
+    const turfGenericPostcardTemplateFront = fs.readFileSync(
+        turfGenericPostcardTemplateFrontPath,
+        'utf-8'
+    );
+
+    const turfGenericPostcardTemplateBack = fs.readFileSync(
+        turfGenericPostcardTemplateBackPath,
         'utf-8'
     );
 
@@ -224,7 +294,10 @@ const main = async () => {
                 hutsonLocationDetails,
                 model: match.model,
                 category: match.category,
-                name: isEmptyString(name) ? 'Current Resident' : name,
+                name:
+                    isEmptyString(name) || name.length > 40
+                        ? 'Current Resident'
+                        : name,
                 email: scrubEmail(obj.Email),
                 street1,
                 street2: obj['Street 2'],
@@ -249,42 +322,24 @@ const main = async () => {
 
     console.log('Sending letters and postcards...');
 
-    // Get list of ag and cce - combine if address is the same
-    const agCceList = data.reduce((acc, obj) => {
-        if (['ag', 'cce'].includes(obj.category)) {
-            const matchIndex = acc.findIndex(
-                (i) =>
-                    `${i.street1}-${i.postalCode}` ===
-                    `${obj.street1}-${obj.postalCode}`
-            );
-            const { category, model, pin, expirationDate, ...rest } = obj;
-            const modelDetails = {
-                category,
-                model,
-                pin,
-                expirationDate,
-            };
-            if (matchIndex === -1) {
-                acc.push({
-                    ...rest,
-                    models: [modelDetails],
-                });
-            } else {
-                acc[matchIndex].models.push(modelDetails);
-            }
-        }
-        return acc;
-    }, []);
+    // Ag and CCE equipment
+    const agCceList = conditionalCreateList(data, (obj) => {
+        return ['ag', 'cce'].includes(obj.category);
+    });
 
     const agCceLetterResults = {
         errorCount: 0,
         successCount: 0,
-        total: agCceList.length,
+        total: 0,
     };
 
     await Promise.all(
-        [agCceList[0]].map((obj) => {
-            return new Promise((resolve, reject) => {
+        agCceList.map((obj) => {
+            return new Promise((resolve) => {
+                if (obj.models.length > 20) {
+                    // This shouldn't ever happen, but will keep anything unexpected from happening
+                    resolve();
+                }
                 lobLimiter.schedule(() => {
                     Lob.letters.create(
                         {
@@ -301,9 +356,16 @@ const main = async () => {
                             merge_variables: {
                                 hutsonAddressLine1:
                                     obj.hutsonLocationDetails.address,
+                                hutsonAddressLine2: `${obj.hutsonLocationDetails.city}, ${obj.hutsonLocationDetails.state} ${obj.hutsonLocationDetails.zip}`,
                                 name: obj.name,
-                                addressLine1: obj.street1,
-                                addressLine2: obj.street2,
+                                addressLine1: [obj.street1, obj.street2]
+                                    .filter(
+                                        (val) =>
+                                            !isEmptyString(val) &&
+                                            isDefined(val)
+                                    )
+                                    .join(', '),
+                                addressLine2: `${obj.city}, ${obj.state} ${obj.postalCode}`,
                                 equipmentList: obj.models
                                     .map((model) => {
                                         return `<li>${model.model} (#${model.pin}) expires ${model.expirationDate}</li>`;
@@ -316,17 +378,18 @@ const main = async () => {
                             color: true,
                             address_placement: 'insert_blank_page',
                         },
-                        (err, res) => {
+                        (err) => {
+                            agCceLetterResults.total += 1;
                             if (err) {
                                 console.error(
-                                    `Failed to sent letter for PIN #${obj.pin}: `,
+                                    `Failed to sent letter to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
                                     err
                                 );
                                 agCceLetterResults.errorCount += 1;
                             } else {
                                 agCceLetterResults.successCount += 1;
                             }
-                            resolve(res);
+                            resolve();
                         }
                     );
                 });
@@ -335,32 +398,167 @@ const main = async () => {
     );
 
     console.log(
-        `Successfully sent ${agCceLetterResults.successCount}/${agCceLetterResults.total} Ag & CCE Letters`
+        `Successfully sent ${agCceLetterResults.successCount}/${agCceLetterResults.total} Ag & CCE letters`
     );
 
-    // Get list of PG eligible turf - combine them
-    const powergardList = data.filter((obj) => {
+    // PowerGard eligible turf equipment
+    const turfPowergardList = conditionalCreateList(data, (obj) => {
         return obj.pgEligible;
     });
 
-    // Get list of non-eligible turf - combine them
-    const turfNonPowergardList = data.filter((obj) => {
+    const turfPowergardPostcardResults = {
+        errorCount: 0,
+        successCount: 0,
+        total: 0,
+    };
+
+    await Promise.all(
+        turfPowergardList.map((obj) => {
+            return new Promise((resolve) => {
+                if (obj.models.length > 3) {
+                    // This shouldn't happen very often, but will keep us from flooding their mailbox
+                    resolve();
+                }
+                Promise.all(
+                    obj.models.map(({ model, pin, expirationDate }) => {
+                        return new Promise((res) => {
+                            lobLimiter.schedule(() => {
+                                Lob.postcards.create(
+                                    {
+                                        to: {
+                                            name: obj.name,
+                                            address_line1: obj.street1,
+                                            address_line2: obj.street2,
+                                            address_city: obj.city,
+                                            address_state: obj.state,
+                                            address_zip: obj.postalCode,
+                                        },
+                                        from: obj.hutsonLocationDetails
+                                            .lobAddressId,
+                                        front: turfPowergardPostcardTemplateFront,
+                                        back: turfPowergardPostcardTemplateBack,
+                                        merge_variables: {
+                                            model,
+                                            pin,
+                                            expirationDate,
+                                        },
+                                        size: '4x6',
+                                    },
+                                    (err) => {
+                                        turfPowergardPostcardResults.total += 1;
+                                        if (err) {
+                                            console.error(
+                                                `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
+                                                err
+                                            );
+                                            turfPowergardPostcardResults.errorCount += 1;
+                                        } else {
+                                            turfPowergardPostcardResults.successCount += 1;
+                                        }
+                                        res();
+                                    }
+                                );
+                            });
+                        });
+                    })
+                ).then(() => {
+                    resolve();
+                });
+            });
+        })
+    );
+
+    console.log(
+        `Successfully sent ${turfPowergardPostcardResults.successCount}/${turfPowergardPostcardResults.total} Turf PowerGard postcards`
+    );
+
+    // Other turf equipment
+    const turfGenericList = conditionalCreateList(data, (obj) => {
         return obj.category === 'turf' && !obj.pgEligible;
     });
 
+    const turfGenericPostcardResults = {
+        errorCount: 0,
+        successCount: 0,
+        total: 0,
+    };
+
+    await Promise.all(
+        turfGenericList.map((obj) => {
+            return new Promise((resolve) => {
+                if (obj.models.length > 3) {
+                    // This shouldn't happen very often, but will keep us from flooding their mailbox
+                    resolve();
+                }
+                Promise.all(
+                    obj.models.map(({ model, pin, expirationDate }) => {
+                        return new Promise((res) => {
+                            lobLimiter.schedule(() => {
+                                Lob.postcards.create(
+                                    {
+                                        to: {
+                                            name: obj.name,
+                                            address_line1: obj.street1,
+                                            address_line2: obj.street2,
+                                            address_city: obj.city,
+                                            address_state: obj.state,
+                                            address_zip: obj.postalCode,
+                                        },
+                                        from: obj.hutsonLocationDetails
+                                            .lobAddressId,
+                                        front: turfGenericPostcardTemplateFront,
+                                        back: turfGenericPostcardTemplateBack,
+                                        merge_variables: {
+                                            model,
+                                            pin,
+                                            expirationDate,
+                                        },
+                                        size: '4x6',
+                                    },
+                                    (err) => {
+                                        turfGenericPostcardResults.total += 1;
+                                        if (err) {
+                                            console.error(
+                                                `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
+                                                err
+                                            );
+                                            turfGenericPostcardResults.errorCount += 1;
+                                        } else {
+                                            turfGenericPostcardResults.successCount += 1;
+                                        }
+                                        res();
+                                    }
+                                );
+                            });
+                        });
+                    })
+                ).then(() => {
+                    resolve();
+                });
+            });
+        })
+    );
+
+    console.log(
+        `Successfully sent ${turfGenericPostcardResults.successCount}/${turfGenericPostcardResults.total} Turf Generic postcards`
+    );
+
     console.log({
         agCceList: agCceList.length,
-        powergardList: powergardList.length,
-        turfNonPowergardList: turfNonPowergardList.length,
+        turfPowergardList: turfPowergardList.length,
+        turfGenericList: turfGenericList.length,
     });
 
     console.log('Creating email lists...');
 
-    // Create lists
     // PowerGard email list
-    const powerGardEmailList = powergardList
+    const powerGardEmailList = data
         .reduce((acc, obj) => {
-            if (isDefined(obj.email) && !isEmptyString(obj.email)) {
+            if (
+                obj.pgEligible &&
+                isDefined(obj.email) &&
+                !isEmptyString(obj.email)
+            ) {
                 const matchIndex = acc.findIndex((i) => i.email === obj.email);
                 if (matchIndex === -1) {
                     acc.push({
@@ -395,6 +593,15 @@ const main = async () => {
     fs.writeFileSync(
         path.join(exportsPath, `powergard-email-list-${timestamp}.json`),
         JSON.stringify(powerGardEmailList, null, 4)
+    );
+
+    await Promise.all(
+        spreadsheetFiles.map((fileName) => {
+            return fs.move(
+                path.join(uploadsPath, fileName),
+                path.join(uploadsCompletedPath, fileName)
+            );
+        })
     );
 };
 

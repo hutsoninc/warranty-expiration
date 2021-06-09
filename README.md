@@ -15,6 +15,8 @@ TODO: Add update the month/year in `src/config.js` to the date used in step 3
 
 6. Run `npm run start`
 
+TODO: Add how to send PowerGard email
+
 ### How to add missing equipment
 
 1. Open the sheet found in `src/data/equipment.csv`

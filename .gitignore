@@ -4,7 +4,7 @@ node_modules/
 exports/*
 src/templates/dist/*
 !src/templates/*/
-uploads/*
+uploads/**/*
 !uploads/*/
 
 !**/.gitkeep
