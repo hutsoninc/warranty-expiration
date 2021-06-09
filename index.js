@@ -372,7 +372,7 @@ const main = async () => {
                     resolve();
                 }
                 lobLimiter.schedule(() => {
-                    Lob.letters.create(
+                    helpers.Lob.letters.create(
                         {
                             to: {
                                 name: obj.name,
@@ -454,7 +454,7 @@ const main = async () => {
                     obj.models.map(({ model, pin, expirationDate }) => {
                         return new Promise((res) => {
                             lobLimiter.schedule(() => {
-                                Lob.postcards.create(
+                                helpers.Lob.postcards.create(
                                     {
                                         to: {
                                             name: obj.name,
@@ -525,7 +525,7 @@ const main = async () => {
                     obj.models.map(({ model, pin, expirationDate }) => {
                         return new Promise((res) => {
                             lobLimiter.schedule(() => {
-                                Lob.postcards.create(
+                                helpers.Lob.postcards.create(
                                     {
                                         to: {
                                             name: obj.name,
