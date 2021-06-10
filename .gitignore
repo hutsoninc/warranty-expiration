@@ -1,6 +1,7 @@
 node_modules/
 .env
 
+db/*
 exports/*
 src/templates/dist/*
 !src/templates/*/

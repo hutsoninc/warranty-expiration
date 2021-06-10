@@ -25,6 +25,7 @@ const lobLimiter = new Bottleneck({
     minTime: 5000 / 125, // Max is 150 per 5 seconds
 });
 
+const dbPath = path.join(__dirname, 'db');
 const uploadsPath = path.join(__dirname, 'uploads');
 const uploadsCompletedPath = path.join(__dirname, 'uploads/completed');
 const exportsPath = path.join(__dirname, 'exports');
@@ -154,7 +155,7 @@ const main = async () => {
                 promptResponses.dryRun ? 'TEST_LOB_KEY' : 'LIVE_LOB_KEY'
             ]
         ),
-        ...promptResponses,
+        promptResponses,
     };
 
     const dateString = new Date().toLocaleString('en-US', {
@@ -359,8 +360,9 @@ const main = async () => {
     });
 
     const agCceLetterResults = {
-        errorCount: 0,
-        successCount: 0,
+        failed: [],
+        sent: [],
+        skipped: [],
         total: 0,
     };
 
@@ -369,68 +371,80 @@ const main = async () => {
             return new Promise((resolve) => {
                 if (obj.models.length > 20) {
                     // This shouldn't ever happen, but will keep anything unexpected from happening
+                    agCceLetterResults.skipped.push(obj);
                     resolve();
                 }
                 lobLimiter.schedule(() => {
-                    helpers.Lob.letters.create(
-                        {
-                            to: {
-                                name: obj.name,
-                                address_line1: obj.street1,
-                                address_line2: obj.street2,
-                                address_city: obj.city,
-                                address_state: obj.state,
-                                address_zip: obj.postalCode,
-                            },
-                            from: obj.hutsonLocationDetails.lobAddressId,
-                            file: agCceLetterTemplate,
-                            merge_variables: {
-                                hutsonAddressLine1:
-                                    obj.hutsonLocationDetails.address,
-                                hutsonAddressLine2: `${obj.hutsonLocationDetails.city}, ${obj.hutsonLocationDetails.state} ${obj.hutsonLocationDetails.zip}`,
-                                name: obj.name,
-                                addressLine1: [obj.street1, obj.street2]
-                                    .filter(
-                                        (val) =>
-                                            !isEmptyString(val) &&
-                                            isDefined(val)
-                                    )
-                                    .join(', '),
-                                addressLine2: `${obj.city}, ${obj.state} ${obj.postalCode}`,
-                                equipmentList: obj.models
-                                    .map((model) => {
-                                        return `<li>${model.model} (#${model.pin}) expires ${model.expirationDate}</li>`;
-                                    })
-                                    .join(''),
-                                hutsonPhoneNumber:
-                                    obj.hutsonLocationDetails.phoneNumber,
-                                date: dateString,
-                            },
-                            color: true,
-                            address_placement: 'insert_blank_page',
+                    const data = {
+                        to: {
+                            name: obj.name,
+                            address_line1: obj.street1,
+                            address_line2: obj.street2,
+                            address_city: obj.city,
+                            address_state: obj.state,
+                            address_zip: obj.postalCode,
                         },
-                        (err) => {
-                            agCceLetterResults.total += 1;
-                            if (err) {
-                                console.error(
-                                    `Failed to sent letter to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
-                                    err
-                                );
-                                agCceLetterResults.errorCount += 1;
-                            } else {
-                                agCceLetterResults.successCount += 1;
-                            }
-                            resolve();
+                        from: obj.hutsonLocationDetails.lobAddressId,
+                        file: agCceLetterTemplate,
+                        merge_variables: {
+                            hutsonAddressLine1:
+                                obj.hutsonLocationDetails.address,
+                            hutsonAddressLine2: `${obj.hutsonLocationDetails.city}, ${obj.hutsonLocationDetails.state} ${obj.hutsonLocationDetails.zip}`,
+                            name: obj.name,
+                            addressLine1: [obj.street1, obj.street2]
+                                .filter(
+                                    (val) =>
+                                        !isEmptyString(val) && isDefined(val)
+                                )
+                                .join(', '),
+                            addressLine2: `${obj.city}, ${obj.state} ${obj.postalCode}`,
+                            equipmentList: obj.models
+                                .map((model) => {
+                                    return `<li>${model.model} (#${model.pin}) expires ${model.expirationDate}</li>`;
+                                })
+                                .join(''),
+                            hutsonPhoneNumber:
+                                obj.hutsonLocationDetails.phoneNumber,
+                            date: dateString,
+                        },
+                        color: true,
+                        address_placement: 'insert_blank_page',
+                    };
+                    helpers.Lob.letters.create(data, (err) => {
+                        agCceLetterResults.total += 1;
+                        if (err) {
+                            console.error(
+                                `Failed to sent letter to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
+                                err
+                            );
+                            agCceLetterResults.failed.push({
+                                ...obj,
+                                data,
+                            });
+                        } else {
+                            agCceLetterResults.sent.push({ ...obj, data });
                         }
-                    );
+                        resolve();
+                    });
                 });
             });
         })
     );
 
     console.log(
-        `Successfully sent ${agCceLetterResults.successCount}/${agCceLetterResults.total} Ag & CCE letters`
+        `Successfully sent ${agCceLetterResults.sent.length}/${agCceLetterResults.total} Ag & CCE letters`
     );
+
+    if (!helpers.promptResponses.dryRun) {
+        try {
+            fs.writeFileSync(
+                path.join(dbPath, `ag-cce-letter-results-${timestamp}.json`),
+                JSON.stringify(agCceLetterResults, null, 4)
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     // PowerGard eligible turf equipment
     const turfPowergardList = conditionalCreateList(data, (obj) => {
@@ -438,8 +452,9 @@ const main = async () => {
     });
 
     const turfPowergardPostcardResults = {
-        errorCount: 0,
-        successCount: 0,
+        failed: [],
+        sent: [],
+        skipped: [],
         total: 0,
     };
 
@@ -448,47 +463,54 @@ const main = async () => {
             return new Promise((resolve) => {
                 if (obj.models.length > 3) {
                     // This shouldn't happen very often, but will keep us from flooding their mailbox
+                    turfPowergardPostcardResults.skipped.push(obj);
                     resolve();
                 }
                 Promise.all(
                     obj.models.map(({ model, pin, expirationDate }) => {
                         return new Promise((res) => {
                             lobLimiter.schedule(() => {
-                                helpers.Lob.postcards.create(
-                                    {
-                                        to: {
-                                            name: obj.name,
-                                            address_line1: obj.street1,
-                                            address_line2: obj.street2,
-                                            address_city: obj.city,
-                                            address_state: obj.state,
-                                            address_zip: obj.postalCode,
-                                        },
-                                        from: obj.hutsonLocationDetails
-                                            .lobAddressId,
-                                        front: turfPowergardPostcardTemplateFront,
-                                        back: turfPowergardPostcardTemplateBack,
-                                        merge_variables: {
-                                            model,
-                                            pin,
-                                            expirationDate,
-                                        },
-                                        size: '4x6',
+                                const data = {
+                                    to: {
+                                        name: obj.name,
+                                        address_line1: obj.street1,
+                                        address_line2: obj.street2,
+                                        address_city: obj.city,
+                                        address_state: obj.state,
+                                        address_zip: obj.postalCode,
                                     },
-                                    (err) => {
-                                        turfPowergardPostcardResults.total += 1;
-                                        if (err) {
-                                            console.error(
-                                                `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
-                                                err
-                                            );
-                                            turfPowergardPostcardResults.errorCount += 1;
-                                        } else {
-                                            turfPowergardPostcardResults.successCount += 1;
-                                        }
-                                        res();
+                                    from: obj.hutsonLocationDetails
+                                        .lobAddressId,
+                                    front: turfPowergardPostcardTemplateFront,
+                                    back: turfPowergardPostcardTemplateBack,
+                                    merge_variables: {
+                                        model,
+                                        pin,
+                                        expirationDate,
+                                    },
+                                    size: '4x6',
+                                };
+                                helpers.Lob.postcards.create(data, (err) => {
+                                    turfPowergardPostcardResults.total += 1;
+                                    if (err) {
+                                        console.error(
+                                            `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
+                                            err
+                                        );
+                                        turfPowergardPostcardResults.failed.push(
+                                            {
+                                                ...obj,
+                                                data,
+                                            }
+                                        );
+                                    } else {
+                                        turfPowergardPostcardResults.sent.push({
+                                            ...obj,
+                                            data,
+                                        });
                                     }
-                                );
+                                    res();
+                                });
                             });
                         });
                     })
@@ -500,8 +522,22 @@ const main = async () => {
     );
 
     console.log(
-        `Successfully sent ${turfPowergardPostcardResults.successCount}/${turfPowergardPostcardResults.total} Turf PowerGard postcards`
+        `Successfully sent ${turfPowergardPostcardResults.sent.length}/${turfPowergardPostcardResults.total} Turf PowerGard postcards`
     );
+
+    if (!helpers.promptResponses.dryRun) {
+        try {
+            fs.writeFileSync(
+                path.join(
+                    dbPath,
+                    `turf-powergard-postcard-results-${timestamp}.json`
+                ),
+                JSON.stringify(turfPowergardPostcardResults, null, 4)
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     // Other turf equipment
     const turfGenericList = conditionalCreateList(data, (obj) => {
@@ -509,8 +545,9 @@ const main = async () => {
     });
 
     const turfGenericPostcardResults = {
-        errorCount: 0,
-        successCount: 0,
+        failed: [],
+        sent: [],
+        skipped: [],
         total: 0,
     };
 
@@ -519,47 +556,52 @@ const main = async () => {
             return new Promise((resolve) => {
                 if (obj.models.length > 3) {
                     // This shouldn't happen very often, but will keep us from flooding their mailbox
+                    turfGenericPostcardResults.skipped.push(obj);
                     resolve();
                 }
                 Promise.all(
                     obj.models.map(({ model, pin, expirationDate }) => {
                         return new Promise((res) => {
                             lobLimiter.schedule(() => {
-                                helpers.Lob.postcards.create(
-                                    {
-                                        to: {
-                                            name: obj.name,
-                                            address_line1: obj.street1,
-                                            address_line2: obj.street2,
-                                            address_city: obj.city,
-                                            address_state: obj.state,
-                                            address_zip: obj.postalCode,
-                                        },
-                                        from: obj.hutsonLocationDetails
-                                            .lobAddressId,
-                                        front: turfGenericPostcardTemplateFront,
-                                        back: turfGenericPostcardTemplateBack,
-                                        merge_variables: {
-                                            model,
-                                            pin,
-                                            expirationDate,
-                                        },
-                                        size: '4x6',
+                                const data = {
+                                    to: {
+                                        name: obj.name,
+                                        address_line1: obj.street1,
+                                        address_line2: obj.street2,
+                                        address_city: obj.city,
+                                        address_state: obj.state,
+                                        address_zip: obj.postalCode,
                                     },
-                                    (err) => {
-                                        turfGenericPostcardResults.total += 1;
-                                        if (err) {
-                                            console.error(
-                                                `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
-                                                err
-                                            );
-                                            turfGenericPostcardResults.errorCount += 1;
-                                        } else {
-                                            turfGenericPostcardResults.successCount += 1;
-                                        }
-                                        res();
+                                    from: obj.hutsonLocationDetails
+                                        .lobAddressId,
+                                    front: turfGenericPostcardTemplateFront,
+                                    back: turfGenericPostcardTemplateBack,
+                                    merge_variables: {
+                                        model,
+                                        pin,
+                                        expirationDate,
+                                    },
+                                    size: '4x6',
+                                };
+                                helpers.Lob.postcards.create(data, (err) => {
+                                    turfGenericPostcardResults.total += 1;
+                                    if (err) {
+                                        console.error(
+                                            `Failed to sent postcard to ${obj.name} at ${obj.street1}, ${obj.city}, ${obj.state} ${obj.postalCode}\n`,
+                                            err
+                                        );
+                                        turfGenericPostcardResults.failed.push({
+                                            ...obj,
+                                            data,
+                                        });
+                                    } else {
+                                        turfGenericPostcardResults.sent.push({
+                                            ...obj,
+                                            data,
+                                        });
                                     }
-                                );
+                                    res();
+                                });
                             });
                         });
                     })
@@ -571,14 +613,22 @@ const main = async () => {
     );
 
     console.log(
-        `Successfully sent ${turfGenericPostcardResults.successCount}/${turfGenericPostcardResults.total} Turf Generic postcards`
+        `Successfully sent ${turfGenericPostcardResults.sent.length}/${turfGenericPostcardResults.total} Turf Generic postcards`
     );
 
-    console.log({
-        agCceList: agCceList.length,
-        turfPowergardList: turfPowergardList.length,
-        turfGenericList: turfGenericList.length,
-    });
+    if (!helpers.promptResponses.dryRun) {
+        try {
+            fs.writeFileSync(
+                path.join(
+                    dbPath,
+                    `turf-generic-postcard-results-${timestamp}.json`
+                ),
+                JSON.stringify(turfGenericPostcardResults, null, 4)
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     console.log('Creating email lists...');
 
@@ -633,16 +683,20 @@ const main = async () => {
         powerGardEmailListCsv
     );
 
-    console.log('Moving files to the completed directory...');
+    if (!helpers.promptResponses.dryRun) {
+        console.log('Moving files to the completed directory...');
 
-    await Promise.all(
-        spreadsheetFiles.map((fileName) => {
-            return fs.move(
-                path.join(uploadsPath, fileName),
-                path.join(uploadsCompletedPath, fileName)
-            );
-        })
-    );
+        await Promise.all(
+            spreadsheetFiles.map((fileName) => {
+                return fs.move(
+                    path.join(uploadsPath, fileName),
+                    path.join(uploadsCompletedPath, fileName)
+                );
+            })
+        );
+    }
+
+    console.log('Finished!');
 };
 
 main().catch((err) => {
