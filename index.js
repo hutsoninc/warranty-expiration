@@ -158,12 +158,18 @@ const main = async () => {
         promptResponses,
     };
 
-    const dateString = new Date().toLocaleString('en-US', {
+    const todayDate = new Date();
+    const todayMonth = todayDate.getMonth()
+    const todayYear = todayDate.getFullYear()
+    const dateString = todayDate.toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     });
-    const timestamp = Date.now();
+    const runningForMonthName = getMonthName((todayMonth + 3) % 13);
+    const runningForYear = (todayMonth + 3) % 13 < todayMonth ? todayYear + 1 : todayYear
+    const timestamp =
+        `${runningForMonthName}-${runningForYear}`.toLowerCase();
     const hutsonLocations = await fetchHutsonLocations(helpers);
 
     // Get equipment lookup data
@@ -690,7 +696,11 @@ const main = async () => {
             spreadsheetFiles.map((fileName) => {
                 return fs.move(
                     path.join(uploadsPath, fileName),
-                    path.join(uploadsCompletedPath, fileName)
+                    path.join(
+                        uploadsCompletedPath,
+                        `${runningForMonthName} ${runningForYear}`,
+                        fileName
+                    )
                 );
             })
         );
