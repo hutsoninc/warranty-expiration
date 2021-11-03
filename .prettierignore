@@ -1,0 +1,6 @@
+db
+exports
+node_modules
+src/data
+src/templates/dist
+uploads

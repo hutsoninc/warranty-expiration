@@ -1,33 +1,37 @@
 {
-    "name": "warranty-expiration",
-    "version": "1.0.0",
-    "description": "Tool for sending warranty expiration notifications.",
-    "main": "index.js",
-    "scripts": {
-        "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
-        "pg": "open-cli https://ew.deere.com/extwrnty/web#!",
-        "start": "node .",
-        "prestart": "node scripts/minify-templates.js"
-    },
-    "author": {
-        "name": "Austin Gordon",
-        "email": "gordon.austin2@gmail.com"
-    },
-    "license": "MIT",
-    "dependencies": {
-        "@hutsoninc/data-scrubber": "^2.0.0",
-        "@hutsoninc/utils": "^1.0.6",
-        "@sanity/client": "^2.10.5",
-        "bottleneck": "^2.19.5",
-        "dotenv": "^8.0.0",
-        "fs-extra": "^10.0.0",
-        "json2csv": "^5.0.6",
-        "lob": "^6.0.5",
-        "prompt": "^1.1.0",
-        "xlsx": "^0.17.0"
-    },
-    "devDependencies": {
-        "html-minifier": "^3.5.21",
-        "open-cli": "^5.0.0"
-    }
+  "name": "warranty-expiration",
+  "version": "1.0.0",
+  "description": "Tool for sending warranty expiration notifications.",
+  "main": "index.js",
+  "scripts": {
+    "jdws": "open-cli https://jdwarrantysystem.deere.com/portal/#/products/warranty-expiration",
+    "pg": "open-cli https://ew.deere.com/extwrnty/web#!",
+    "start": "node .",
+    "prestart": "node scripts/minify-templates.js",
+    "prettier": "prettier --write ."
+  },
+  "author": {
+    "name": "Austin Gordon",
+    "email": "gordon.austin2@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@hutsoninc/data-scrubber": "^2.0.0",
+    "@hutsoninc/utils": "^1.0.6",
+    "@sanity/client": "^2.10.5",
+    "bottleneck": "^2.19.5",
+    "dotenv": "^8.0.0",
+    "fs-extra": "^10.0.0",
+    "json2csv": "^5.0.6",
+    "lob": "^6.0.5",
+    "prompt": "^1.1.0",
+    "xlsx": "^0.17.0"
+  },
+  "devDependencies": {
+    "@austinleegordon/prettier-config": "^1.0.0",
+    "html-minifier": "^3.5.21",
+    "open-cli": "^5.0.0",
+    "prettier": "^2.4.1"
+  },
+  "prettier": "@austinleegordon/prettier-config"
 }

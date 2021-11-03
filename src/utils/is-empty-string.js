@@ -3,8 +3,8 @@
  * @param {*} val - Value to test
  * @returns {boolean} Returns true if empty or false otherwise
  */
-const isEmptyString = (val) => {
-    return val === '' || !/[\S]/g.test(val);
-};
+const isEmptyString = val => {
+  return val === '' || !/[\S]/g.test(val)
+}
 
-module.exports = isEmptyString;
+module.exports = isEmptyString

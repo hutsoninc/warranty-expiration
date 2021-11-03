@@ -1,7 +1,7 @@
-const months = require('./months');
+const months = require('./months')
 
-const getMonthName = (monthNumber) => {
-    return months[Number(monthNumber) - 1];
-};
+const getMonthName = monthNumber => {
+  return months[Number(monthNumber) - 1]
+}
 
-module.exports = getMonthName;
+module.exports = getMonthName
