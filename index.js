@@ -112,6 +112,21 @@ const conditionalCreateList = (data, test) => {
   }, [])
 }
 
+const getHutsonLocation = (locationDealerNumber, hutsonLocations) => {
+  let match = hutsonLocations.find(loc => {
+    return [loc.agDealerId, loc.turfDealerId, loc.cceDealerId].includes(locationDealerNumber)
+  })
+
+  if (!match) {
+    // Grand Ledge -> Charlottle
+    if (['039022', '055032'].includes(locationDealerNumber)) {
+      match = hutsonLocations.find(loc => loc.locationNumber === 68)
+    }
+  }
+
+  return match
+}
+
 const main = async () => {
   prompt.start()
 
@@ -283,9 +298,7 @@ const main = async () => {
       ) {
         return
       }
-      const hutsonLocationDetails = hutsonLocations.find(loc => {
-        return [loc.agDealerId, loc.turfDealerId, loc.cceDealerId].includes(hutsonDealerNumber)
-      })
+      const hutsonLocationDetails = getHutsonLocation(hutsonDealerNumber, hutsonLocations)
       if (!hutsonLocationDetails) {
         console.log(`No Hutson location found with dealer id #${hutsonDealerNumber}`)
         return

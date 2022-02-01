@@ -54,7 +54,7 @@ const fetchHutsonLocations = async helpers => {
   // Fetch Hutson locations from Sanity
   const sanityHutsonLocations = await client
     .fetch(
-      '*[_type == "location" && retailLocation == true]{title, address, city, state, zip, phoneNumber, agDealerId, cceDealerId, turfDealerId}'
+      '*[_type == "location" && retailLocation == true]{title, address, city, state, zip, phoneNumber, agDealerId, cceDealerId, turfDealerId, locationNumber}'
     )
     .then(locations => {
       if (locations.length === 0) {
