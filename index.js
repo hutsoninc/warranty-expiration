@@ -122,6 +122,10 @@ const getHutsonLocation = (locationDealerNumber, hutsonLocations) => {
     if (['039022', '055032'].includes(locationDealerNumber)) {
       match = hutsonLocations.find(loc => loc.locationNumber === 68)
     }
+    // Grand River (Williamston E-Commerce) -> Williamston
+    if (['038965', '038961', '055012'].includes(locationDealerNumber)) {
+      match = hutsonLocations.find(loc => loc.locationNumber === 62)
+    }
   }
 
   return match
