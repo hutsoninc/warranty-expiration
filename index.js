@@ -170,10 +170,11 @@ const main = async () => {
     month: 'long',
     day: 'numeric',
   })
-  const runningForMonthNumber = (todayMonth + 3) % 12
+  const runningForMonthNumber = todayMonth + 3 > 12 ? todayMonth - 9 : todayMonth + 3
   const runningForMonthName = getMonthName(runningForMonthNumber)
   const runningForYear = runningForMonthNumber < todayMonth ? todayYear + 1 : todayYear
   const timestamp = `${runningForMonthName}-${runningForYear}`.toLowerCase()
+
   const hutsonLocations = await fetchHutsonLocations(helpers)
 
   // Get equipment lookup data
