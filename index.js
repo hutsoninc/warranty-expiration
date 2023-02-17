@@ -391,6 +391,8 @@ const main = async () => {
               date: dateString,
             },
             color: true,
+            mail_type: 'usps_standard',
+            use_type: 'marketing',
             address_placement: 'insert_blank_page',
           }
           helpers.Lob.letters.create(data, err => {
@@ -470,6 +472,7 @@ const main = async () => {
                     pin,
                     expirationDate,
                   },
+                  use_type: `marketing`,
                   size: '4x6',
                 }
                 helpers.Lob.postcards.create(data, err => {
@@ -557,6 +560,7 @@ const main = async () => {
                     pin,
                     expirationDate,
                   },
+                  use_type: 'marketing',
                   size: '4x6',
                 }
                 helpers.Lob.postcards.create(data, err => {
