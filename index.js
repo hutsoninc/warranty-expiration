@@ -118,13 +118,14 @@ const getHutsonLocation = (locationDealerNumber, hutsonLocations) => {
   })
 
   if (!match) {
-    // Grand Ledge -> Charlottle
     if (['039022', '055032'].includes(locationDealerNumber)) {
+      // Grand Ledge -> Charlottle
       match = hutsonLocations.find(loc => loc.locationNumber === 68)
-    }
-    // Grand River (Williamston E-Commerce) -> Williamston
-    if (['038965', '038961', '055012'].includes(locationDealerNumber)) {
+    } else if (['038965', '038961', '055012'].includes(locationDealerNumber)) {
+      // Grand River (Williamston E-Commerce) -> Williamston
       match = hutsonLocations.find(loc => loc.locationNumber === 62)
+    } else {
+      throw new Error(`No Hutson location match for dealer ID \`${locationDealerNumber}\``)
     }
   }
 
